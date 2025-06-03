@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JustPaste - Simple Text Sharing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+</head>
+<body>
+    <div class="main-container">
+        <header class="app-header">
+            <h1>📝 JustPaste</h1>
+            <p class="subtitle">Quickly save and share text snippets.</p>
+        </header>
+
+        <div class="content-wrapper">
+            <div id="editor-area" class="card">
+                <textarea id="textContent" placeholder="Paste your text here... or start typing."></textarea>
+                <div id="edit-code-section" class="input-group" style="display: none;">
+                    <label for="editCodeInput">Enter Edit Code:</label>
+                    <input type="text" id="editCodeInput" placeholder="Your secret edit code">
+                </div>
+                <div class="button-group">
+                    <button id="saveButton" class="btn btn-primary">Save Note</button>
+                    <button id="updateButton" class="btn btn-warning" style="display: none;">Update Note</button>
+                    <button id="newNoteButton" class="btn btn-secondary" style="display: none;">Create New Note</button>
+                </div>
+            </div>
+
+            <div id="info-area" class="card" style="display: none;">
+                <h2>Note Saved!</h2>
+                <p id="message" class="success-message"></p>
+                <div class="info-item">
+                    <strong>View Link:</strong>
+                    <div class="link-container">
+                        <a id="viewLink" href="#" target="_blank"></a>
+                        <button class="btn-copy" data-clipboard-target="#viewLink" title="Copy View Link">📋</button>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <strong>Edit Link:</strong>
+                    <div class="link-container">
+                        <a id="editLink" href="#"></a>
+                        <button class="btn-copy" data-clipboard-target="#editLink" title="Copy Edit Link">📋</button>
+                    </div>
+                </div>
+                 <div class="info-item">
+                    <strong>Edit Code:</strong>
+                    <div class="link-container">
+                        <span id="editCodeDisplay" class="code-display"></span>
+                        <button class="btn-copy" data-clipboard-target="#editCodeDisplay" title="Copy Edit Code">📋</button>
+                    </div>
+                    <small class="warning-text">Keep this code secret! You'll need it to edit your note.</small>
+                </div>
+                <div class="button-group">
+                    <button id="createNewFromInfoButton" class="btn btn-secondary">Create Another Note</button>
+                </div>
+            </div>
+
+            <div id="view-area" class="card" style="display: none;">
+                <h2>View Note</h2>
+                <pre id="noteContentDisplay" class="note-content-box"></pre>
+                <p class="timestamp"><em id="noteTimestamp"></em></p>
+                <div class="button-group">
+                    <button id="editThisNoteButton" class="btn btn-secondary">Edit This Note</button>
+                    <button id="createNewNoteFromViewButton" class="btn btn-primary">Create New Note</button>
+                </div>
+            </div>
+
+            <div id="loading-indicator" class="loading-indicator" style="display: none;">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
+            <div id="error-message" class="error-text alert alert-danger" style="display: none;"></div>
+        </div>
+        
+        <footer class="app-footer">
+            <p>&copy; <span id="currentYear"></span> JustPaste. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Small script for footer year and clipboard
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        document.querySelectorAll('.btn-copy').forEach(button => {
+            button.addEventListener('click', function() {
+                const targetSelector = this.getAttribute('data-clipboard-target');
+                const targetElement = document.querySelector(targetSelector);
+                let textToCopy = '';
+
+                if (targetElement) {
+                    if (targetElement.tagName === 'A') {
+                        textToCopy = targetElement.href;
+                    } else if (targetElement.tagName === 'SPAN') {
+                        textToCopy = targetElement.textContent;
+                    }
+                }
+                
+                if (textToCopy) {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = textToCopy;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        alert('Copied to clipboard!'); // Replace with a nicer notification if desired
+                    } catch (err) {
+                        console.error('Failed to copy: ', err);
+                        alert('Failed to copy. Please copy manually.');
+                    }
+                    document.body.removeChild(textArea);
+                }
+            });
+        });
+        // Add event listener for the new button in info-area
+        const createNewFromInfoButton = document.getElementById('createNewFromInfoButton');
+        if (createNewFromInfoButton) {
+            createNewFromInfoButton.addEventListener('click', () => {
+                window.location.hash = '#/'; 
+            });
+        }
+    </script>
+</body>
+</html>

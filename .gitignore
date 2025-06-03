@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Production
+/build
+/dist
+
+# Misc
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node.js
+package-lock.json # Optional: some prefer to commit this, others don't. If in doubt, keep it.
+pnpm-lock.yaml # If using pnpm
+
+# Environment variables
+*.env
+
+# Firebase
+# IMPORTANT: Add the exact name of your Firebase service account key file
+# For example, if your file is named 'my-service-account-key.json'
+# and it's in the root or a 'config' folder:
+serviceAccountKey.json
+config/serviceAccountKey.json
+*.json # If your service account key is the only JSON file you want to ignore at root. Be more specific if possible.
+
+# Operating System / IDE specific
+Thumbs.db
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sublime-workspace
+
+# Logs
+logs
+*.log
+
+# Optional: Test coverage
+.nyc_output/
+
+# Optional: Editor directories and files
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sublime-workspace
+
+# Firebase
+firebase-debug.log*
+firebase-debug.log-v1*
+firebase-debug.log-v2*
+firebase-debug.log-v3*
