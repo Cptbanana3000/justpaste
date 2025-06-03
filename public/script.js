@@ -117,10 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
         infoArea.style.display = 'none';
         viewArea.style.display = 'block';
 
-        // Use the linkify function here
-        // Since noteContentDisplay is a <pre> tag, we set its innerHTML
-        // to allow the <a> tags to render.
-        noteContentDisplay.innerHTML = linkify(noteData.content); 
+        // Set the value of the textarea for view mode
+        noteContentDisplay.value = noteData.content;
 
         if (noteData.createdAt) {
             noteTimestampDisplay.textContent = `Created: ${new Date(noteData.createdAt).toLocaleString()}`;
