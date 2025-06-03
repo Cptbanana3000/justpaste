@@ -125,6 +125,19 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             noteTimestampDisplay.textContent = '';
         }
+        // Show views if available
+        let viewsDisplay = document.getElementById('noteViewsDisplay');
+        if (!viewsDisplay) {
+            viewsDisplay = document.createElement('div');
+            viewsDisplay.id = 'noteViewsDisplay';
+            viewsDisplay.style = 'font-size: 0.95em; color: #b0b0b0; margin-top: 6px; text-align: right;';
+            noteTimestampDisplay.parentNode.appendChild(viewsDisplay);
+        }
+        if (typeof noteData.views === 'number') {
+            viewsDisplay.textContent = `Views: ${noteData.views}`;
+        } else {
+            viewsDisplay.textContent = '';
+        }
         currentNoteId = noteData.id;
         clearError();
     }

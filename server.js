@@ -102,6 +102,16 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
+// Helper function to generate a random 7-character alphanumeric ID
+function generateShortId(length = 7) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
 // --- API Routes ---
 
 // POST /api/notes - Create a new note
@@ -109,18 +119,28 @@ app.post('/api/notes', createNoteLimiter, validateContentSize, async (req, res) 
   try {
     const { content } = req.body;
     const editCode = crypto.randomBytes(16).toString('hex');
-    
-    // Firestore will auto-generate an ID for the new document
-    const newNoteRef = await notesCollection.add({
+
+    // Generate a unique 7-character ID
+    let noteId;
+    let exists = true;
+    while (exists) {
+      noteId = generateShortId();
+      const doc = await notesCollection.doc(noteId).get();
+      exists = doc.exists;
+    }
+
+    // Save the note with the custom ID
+    await notesCollection.doc(noteId).set({
       content,
       editCode,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(), // Use Firestore server timestamp
-      size: Buffer.byteLength(content, 'utf8') // Store the size for reference
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      size: Buffer.byteLength(content, 'utf8'),
+      views: 0
     });
 
     res.status(201).json({
-      id: newNoteRef.id, // Shareable ID (Firestore document ID)
-      editCode: editCode, // Secret code for editing
+      id: noteId, // Short, shareable ID
+      editCode: editCode,
       message: 'Note created successfully.'
     });
   } catch (error) {
@@ -133,19 +153,23 @@ app.post('/api/notes', createNoteLimiter, validateContentSize, async (req, res) 
 app.get('/api/notes/:id', async (req, res) => {
   try {
     const noteId = req.params.id;
-    const noteDoc = await notesCollection.doc(noteId).get();
+    const noteRef = notesCollection.doc(noteId);
+    const noteDoc = await noteRef.get();
 
     if (!noteDoc.exists) {
       return res.status(404).json({ message: 'Note not found.' });
     }
 
-    const noteData = noteDoc.data();
+    // Increment the views field atomically
+    await noteRef.update({ views: admin.firestore.FieldValue.increment(1) });
+    // Get the updated document
+    const updatedDoc = await noteRef.get();
+    const noteData = updatedDoc.data();
     res.status(200).json({
       content: noteData.content,
-      id: noteDoc.id,
-      // Firestore timestamp needs to be converted if you want a specific format on client
-      // For simplicity, sending as is, or convert to ISO string: noteData.createdAt.toDate().toISOString()
-      createdAt: noteData.createdAt ? noteData.createdAt.toDate() : null 
+      id: updatedDoc.id,
+      createdAt: noteData.createdAt ? noteData.createdAt.toDate() : null,
+      views: noteData.views || 1
     });
   } catch (error) {
     console.error('Error fetching note:', error);
