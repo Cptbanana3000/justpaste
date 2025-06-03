@@ -117,8 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
         infoArea.style.display = 'none';
         viewArea.style.display = 'block';
 
-        // Set the value of the textarea for view mode
-        noteContentDisplay.value = noteData.content;
+        // Render clickable links in the note content
+        noteContentDisplay.innerHTML = linkify(noteData.content);
 
         if (noteData.createdAt) {
             noteTimestampDisplay.textContent = `Created: ${new Date(noteData.createdAt).toLocaleString()}`;
