@@ -5,17 +5,76 @@ const cors = require('cors');
 const path = require('path');
 const admin = require('firebase-admin');
 const crypto = require('crypto'); // For generating editCode
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Content size limits
+const MAX_CONTENT_SIZE = 20 * 1024; // 20KB in bytes
+const MAX_CONTENT_SIZE_MB = '20KB'; // For error messages
+
+// Content size validation middleware
+const validateContentSize = (req, res, next) => {
+    const content = req.body.content;
+    // Type check: must be a string
+    if (typeof content !== 'string') {
+        return res.status(400).json({ message: 'Content must be a string.' });
+    }
+    // Reject empty string (already checked, but keep for robustness)
+    if (!content.trim()) {
+        return res.status(400).json({ message: 'Content cannot be empty.' });
+    }
+    // Optionally, reject strings with only whitespace or control chars
+    // if (!/\S/.test(content)) {
+    //     return res.status(400).json({ message: 'Content must contain visible characters.' });
+    // }
+    const contentSize = Buffer.byteLength(content, 'utf8');
+    if (contentSize > MAX_CONTENT_SIZE) {
+        const currentSizeKB = Math.round(contentSize / 1024);
+        return res.status(413).json({ 
+            message: `Content size (${currentSizeKB}KB) exceeds the maximum limit of ${MAX_CONTENT_SIZE_MB}.`,
+            maxSize: MAX_CONTENT_SIZE_MB,
+            currentSize: `${currentSizeKB}KB`
+        });
+    }
+    next();
+};
+
+// --- Rate Limiting Configuration ---
+// General API limiter
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 50, // Reduced from 100 to 50 requests per windowMs
+    message: 'Too many requests from this IP, please try again after 15 minutes',
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+// Stricter limiter for note creation
+const createNoteLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 5, // Reduced from 10 to 5 note creations per hour
+    message: 'Too many notes created from this IP, please try again after an hour',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Stricter limiter for note updates
+const updateNoteLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // Reduced from 20 to 10 updates per 15 minutes
+    message: 'Too many note updates from this IP, please try again after 15 minutes',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 // --- Firebase Admin SDK Initialization ---
-// GOOGLE_APPLICATION_CREDENTIALS environment variable should point to your service account key JSON file
 try {
   admin.initializeApp({
-    // credential: admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS)) // If not using env var directly
+    credential: admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS))
   });
-  console.log('Firebase Admin SDK initialized successfully.');
+  // Firebase Admin SDK initialized
 } catch (error) {
   console.error('Firebase Admin SDK initialization error:', error);
   process.exit(1);
@@ -26,20 +85,29 @@ const notesCollection = db.collection('notes'); // Define your Firestore collect
 
 // Middleware
 app.use(cors()); // Enable Cross-Origin Resource Sharing
-app.use(express.json()); // Parse JSON request bodies
+app.use(express.json({ limit: '200kb' })); // Set higher than our own limit so our middleware can handle it
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from 'public' directory
+
+// Apply rate limiting to all API routes
+app.use('/api/', apiLimiter);
+
+// Global error handler for payload too large
+app.use((err, req, res, next) => {
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({
+      message: 'Payload too large. The maximum allowed is 100KB.',
+      maxSize: '100KB'
+    });
+  }
+  next(err);
+});
 
 // --- API Routes ---
 
 // POST /api/notes - Create a new note
-console.log('Defining POST /api/notes route');
-app.post('/api/notes', async (req, res) => {
+app.post('/api/notes', createNoteLimiter, validateContentSize, async (req, res) => {
   try {
     const { content } = req.body;
-    if (!content) {
-      return res.status(400).json({ message: 'Content cannot be empty.' });
-    }
-
     const editCode = crypto.randomBytes(16).toString('hex');
     
     // Firestore will auto-generate an ID for the new document
@@ -47,6 +115,7 @@ app.post('/api/notes', async (req, res) => {
       content,
       editCode,
       createdAt: admin.firestore.FieldValue.serverTimestamp(), // Use Firestore server timestamp
+      size: Buffer.byteLength(content, 'utf8') // Store the size for reference
     });
 
     res.status(201).json({
@@ -61,7 +130,6 @@ app.post('/api/notes', async (req, res) => {
 });
 
 // GET /api/notes/:id - Get a note by its ID
-console.log('Defining GET /api/notes/:id route');
 app.get('/api/notes/:id', async (req, res) => {
   try {
     const noteId = req.params.id;
@@ -85,15 +153,31 @@ app.get('/api/notes/:id', async (req, res) => {
   }
 });
 
+// GET /api/notes/:id/raw - Get raw note content as text/plain
+app.get('/api/notes/:id/raw', async (req, res) => {
+  try {
+    const noteId = req.params.id;
+    const noteDoc = await notesCollection.doc(noteId).get();
+
+    if (!noteDoc.exists) {
+      return res.status(404).send('Note not found.');
+    }
+
+    const noteData = noteDoc.data();
+    res.setHeader('Content-Type', 'text/plain');
+    res.send(noteData.content);
+  } catch (error) {
+    console.error('Error fetching raw note:', error);
+    res.status(500).send('Server error while fetching raw note.');
+  }
+});
+
 // PUT /api/notes/:id - Update an existing note
-app.put('/api/notes/:id', async (req, res) => {
+app.put('/api/notes/:id', updateNoteLimiter, validateContentSize, async (req, res) => {
   try {
     const noteId = req.params.id;
     const { content, editCode } = req.body;
 
-    if (!content) {
-      return res.status(400).json({ message: 'Content cannot be empty.' });
-    }
     if (!editCode) {
       return res.status(400).json({ message: 'Edit code is required.' });
     }
@@ -112,7 +196,8 @@ app.put('/api/notes/:id', async (req, res) => {
 
     await noteRef.update({
       content,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp() // Optionally add an updatedAt field
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      size: Buffer.byteLength(content, 'utf8') // Update the size
     });
 
     res.status(200).json({ message: 'Note updated successfully.', id: noteDoc.id });
@@ -134,7 +219,5 @@ app.get(/^(?!\/api).*/, (req, res) => {
   });
 // --- Start Server ---
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
-
-console.log('Server started on port', PORT);

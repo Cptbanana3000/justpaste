@@ -25,6 +25,12 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px; /* Space between header, content, footer */
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    /* background-color: #fff; */
+    /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+    /* border-radius: 8px; */
 }
 
 /* Header */
@@ -45,6 +51,8 @@ body {
 .app-header .subtitle {
     font-size: 1.1rem;
     color: #555;
+    text-align: center;
+    display: block;
 }
 
 /* Content Wrapper & Cards */
@@ -315,6 +323,14 @@ textarea#textContent:focus {
     border-top: 1px solid #e0e0e0;
     font-size: 0.9rem;
     color: #555;
+    text-align: center;
+}
+
+.copyright-text {
+    text-align: center;
+    width: 100%;
+    display: block;
+    margin: 0 auto;
 }
 
 /* Responsive adjustments */
@@ -345,4 +361,161 @@ textarea#textContent:focus {
         flex-direction: column; /* Stack buttons on small screens */
         align-items: stretch; /* Make buttons full width in column */
     }
+}
+
+/* Rate Limit Alert */
+.rate-limit-alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #ff4444;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transform: translateX(120%);
+    transition: transform 0.3s ease-in-out;
+    max-width: 400px;
+}
+
+.rate-limit-alert.show {
+    transform: translateX(0);
+}
+
+.rate-limit-alert .alert-icon {
+    font-size: 24px;
+}
+
+.rate-limit-alert .alert-content {
+    flex: 1;
+}
+
+.rate-limit-alert .alert-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.rate-limit-alert .alert-message {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.rate-limit-alert .close-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 20px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.rate-limit-alert .close-button:hover {
+    opacity: 1;
+}
+
+/* Content Size Display */
+.content-size-display {
+    font-size: 0.9rem;
+    color: #666;
+    text-align: right;
+    margin: 5px 0 15px 0;
+    padding: 5px 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    display: inline-block;
+    float: right;
+}
+
+.content-size-display.size-warning {
+    color: #dc3545;
+    background-color: #fff3f3;
+    border: 1px solid #ffcdd2;
+}
+
+/* Clear float after the size display */
+#textContent {
+    clear: both;
+}
+
+/* General styles for policy pages */
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 2rem;
+}
+
+p {
+    line-height: 1.6;
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Policy Section Headings */
+.policy-section {
+    margin-bottom: 32px;
+    margin-top: 32px;
+}
+.policy-section:first-child {
+    margin-top: 0;
+}
+.policy-section h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #222;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 6px;
+}
+.policy-section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+.policy-section ul {
+    margin-left: 24px;
+    margin-bottom: 10px;
+}
+.policy-section li {
+    margin-bottom: 7px;
+    line-height: 1.7;
+}
+.policy-section hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 24px 0;
+}
+
+/* Make sure paragraphs in policy sections have spacing */
+.policy-section p {
+    margin-bottom: 12px;
+}
+
+.footer-links {
+    text-align: center;
+    margin-top: 10px;
+}
+.footer-links a {
+    margin: 0 10px;
+    color: #007bff;
+    text-decoration: none;
+}
+.footer-links a:hover {
+    text-decoration: underline;
 }

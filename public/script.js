@@ -29,6 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const API_BASE_URL = '/api/notes';
 
+    // Content size constants
+    const MAX_CONTENT_SIZE = 20 * 1024; // 20KB in bytes
+    const MAX_CONTENT_SIZE_DISPLAY = '20KB';
+
     // --- Helper function to make links clickable ---
     function linkify(inputText) {
         if (!inputText) return '';
@@ -142,11 +146,36 @@ document.addEventListener('DOMContentLoaded', () => {
         clearError();
     }
 
+    // Add size display to the editor area
+    function updateSizeDisplay() {
+        const content = textContent.value;
+        const size = new Blob([content]).size;
+        const sizeDisplay = document.getElementById('contentSizeDisplay');
+        
+        if (sizeDisplay) {
+            const sizeInKB = Math.round(size / 1024);
+            sizeDisplay.textContent = `${sizeInKB}KB / ${MAX_CONTENT_SIZE_DISPLAY}`;
+            
+            // Add warning class if approaching limit
+            if (size > MAX_CONTENT_SIZE * 0.9) { // 90% of max size
+                sizeDisplay.classList.add('size-warning');
+            } else {
+                sizeDisplay.classList.remove('size-warning');
+            }
+        }
+    }
+
     // --- API Calls ---
     async function saveNote() {
         const content = textContent.value.trim();
         if (!content) {
             showError('Content cannot be empty.');
+            return;
+        }
+
+        const contentSize = new Blob([content]).size;
+        if (contentSize > MAX_CONTENT_SIZE) {
+            showError(`Content size (${Math.round(contentSize / 1024)}KB) exceeds the maximum limit of ${MAX_CONTENT_SIZE_DISPLAY}.`);
             return;
         }
 
@@ -160,7 +189,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                if (response.status === 413) {
+                    showError(data.message);
+                } else if (response.status === 429) {
+                    showRateLimitAlert('Rate limit reached. You can create up to 5 notes per hour.');
+                } else {
+                    throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                }
+                return;
             }
             currentNoteId = data.id;
             currentEditCode = data.editCode; 
@@ -194,6 +230,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const contentSize = new Blob([content]).size;
+        if (contentSize > MAX_CONTENT_SIZE) {
+            showError(`Content size (${Math.round(contentSize / 1024)}KB) exceeds the maximum limit of ${MAX_CONTENT_SIZE_DISPLAY}.`);
+            return;
+        }
+
         showLoading(true);
         updateButton.disabled = true;
         try {
@@ -204,7 +246,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                if (response.status === 413) {
+                    showError(data.message);
+                } else if (response.status === 429) {
+                    showRateLimitAlert('Rate limit reached. You can update a note up to 10 times per 15 minutes.');
+                } else {
+                    throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                }
+                return;
             }
             window.location.hash = `#/view/${currentNoteId}`;
             alert('Note updated successfully!');
@@ -288,4 +337,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial load
     handleHashChange(); 
+
+    // Rate Limit Alert Functions
+    function showRateLimitAlert(message = 'You\'ve reached the maximum number of requests. Please try again later.') {
+        const alert = document.getElementById('rateLimitAlert');
+        if (!alert) {
+            console.error('Rate limit alert element not found');
+            return;
+        }
+        const alertMessage = alert.querySelector('.alert-message');
+        if (alertMessage) {
+            alertMessage.textContent = message;
+        }
+        alert.style.display = 'flex';
+        setTimeout(() => {
+            alert.classList.add('show');
+        }, 10);
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            hideRateLimitAlert();
+        }, 5000);
+    }
+
+    function hideRateLimitAlert() {
+        const alert = document.getElementById('rateLimitAlert');
+        if (!alert) return;
+        
+        alert.classList.remove('show');
+        setTimeout(() => {
+            alert.style.display = 'none';
+        }, 300);
+    }
+
+    // Make functions globally available
+    window.showRateLimitAlert = showRateLimitAlert;
+    window.hideRateLimitAlert = hideRateLimitAlert;
+
+    // Add size display element
+    const sizeDisplay = document.createElement('div');
+    sizeDisplay.id = 'contentSizeDisplay';
+    sizeDisplay.className = 'content-size-display';
+    textContent.parentNode.insertBefore(sizeDisplay, textContent.nextSibling);
+    
+    // Add input event listener for real-time size updates
+    textContent.addEventListener('input', updateSizeDisplay);
+    
+    // Initial size display
+    updateSizeDisplay();
+
+    // Function to load a note
+    async function loadNote() {
+        const noteId = getNoteIdFromUrl();
+        if (!noteId) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/${noteId}`);
+            if (!response.ok) {
+                throw new Error('Note not found');
+            }
+            const data = await response.json();
+            document.getElementById('textContent').value = data.content;
+            const noteIdElement = document.getElementById('noteId');
+            if (noteIdElement) {
+                noteIdElement.textContent = noteId;
+                // Add a link to the raw view
+                const rawLink = document.createElement('a');
+                rawLink.href = `${API_BASE_URL}/${noteId}/raw`;
+                rawLink.textContent = 'View Raw';
+                rawLink.target = '_blank';
+                noteIdElement.appendChild(document.createElement('br'));
+                noteIdElement.appendChild(rawLink);
+            }
+        } catch (error) {
+            console.error('Error loading note:', error);
+            alert('Error loading note. Please check the URL and try again.');
+        }
+    }
 });
