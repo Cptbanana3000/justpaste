@@ -89,11 +89,11 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://www.google-analytics.com","https://*.analytics.google.com"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
-            imgSrc: ["'self'", "data:"],
-            connectSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https://www.google-analytics.com", "https://*.google-analytics.com","https://*.analytics.google.com"],
+            connectSrc: ["'self'", "https://*.google-analytics.com","https://*.analytics.google.com","https://*.firebaseio.com","https://firestore.googleapis.com"],
         },
     },
     crossOriginEmbedderPolicy: false, // Required for Firebase
