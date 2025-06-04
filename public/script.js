@@ -24,6 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingIndicator = document.getElementById('loading-indicator');
     const errorMessageDisplay = document.getElementById('error-message');
 
+    const codeAccessRow = document.getElementById('code-access-row');
+    const codeAccessInput = document.getElementById('codeAccessInput');
+    const codeAccessButton = document.getElementById('codeAccessButton');
+
+    const accessCodeDisplay = document.getElementById('accessCodeDisplay');
+
     let currentNoteId = null;
     let currentEditCode = null;
 
@@ -87,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editCodeInput.value = '';
         textContent.disabled = false;
         clearError();
+        if (codeAccessRow) codeAccessRow.style.display = 'flex';
     }
 
     function showInfoView(data) {
@@ -99,17 +106,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!basePath.endsWith('/')) {
             basePath += '/';
         }
-        
+        if (accessCodeDisplay) accessCodeDisplay.textContent = data.id || '';
         viewLinkDisplay.href = `${basePath}#/view/${data.id}`;
         viewLinkDisplay.textContent = `View: ${basePath}#/view/${data.id}`;
-        
         editLinkDisplay.href = `${basePath}#/edit/${data.id}`;
         editLinkDisplay.textContent = `Edit: ${basePath}#/edit/${data.id}`;
-        
         editCodeDisplay.textContent = data.editCode || " (Not available)";
-        
         newNoteButton.style.display = 'inline-block';
         clearError();
+        if (codeAccessRow) codeAccessRow.style.display = 'none';
     }
 
     function showNoteView(noteData) {
@@ -140,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         currentNoteId = noteData.id;
         clearError();
+        if (codeAccessRow) codeAccessRow.style.display = 'none';
     }
 
     function showEditView(noteContent) {
@@ -155,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editCodeInput.value = currentEditCode || '';
         textContent.disabled = false;
         clearError();
+        if (codeAccessRow) codeAccessRow.style.display = 'none';
     }
 
     // Add size display to the editor area
@@ -418,5 +425,21 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error loading note:', error);
             alert('Error loading note. Please check the URL and try again.');
         }
+    }
+
+    // Code access logic
+    if (codeAccessButton && codeAccessInput) {
+        codeAccessButton.addEventListener('click', () => {
+            const code = codeAccessInput.value.trim();
+            if (code) {
+                window.location.hash = `#/view/${code}`;
+                codeAccessInput.value = '';
+            }
+        });
+        codeAccessInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                codeAccessButton.click();
+            }
+        });
     }
 });

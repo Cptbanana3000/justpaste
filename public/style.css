@@ -430,6 +430,36 @@ textarea#textContent:focus {
         font-size: 0.85rem;
         padding: 3px 6px;
     }
+    .note-content-box a {
+        font-size: 0.85em;
+    }
+    .note-content-box {
+        font-size: 0.85em;
+        padding: 8px;
+    }
+    .code-access-row {
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 10px;
+        margin-top: 0;
+        width: 100%;
+    }
+    .code-access-input {
+        width: 100%;
+        font-size: 1rem;
+        padding: 10px 12px;
+        border-radius: 8px;
+        flex: 1 1 auto;
+    }
+    #codeAccessButton.btn {
+        width: auto;
+        min-width: 48px;
+        font-size: 0.92rem;
+        padding: 6px 12px;
+        border-radius: 6px;
+        flex: 0 0 auto;
+    }
 }
 
 /* Rate Limit Alert */
@@ -605,13 +635,32 @@ a:hover {
     color: #82aaff;
 }
 
-
-@media (max-width: 600px) {
-    .note-content-box a {
-        font-size: 0.85em;
-    }
-    .note-content-box {
-        font-size: 0.85em;
-        padding: 8px;
-    }
+.code-access-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-bottom: 6px;
+    margin-top: 0;
+    width: 100%;
+}
+.code-access-input {
+    width: 140px;
+    padding: 6px 10px;
+    border: 1px solid #333;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background-color: #181a1b;
+    color: #e0e0e0;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.code-access-input:focus {
+    border-color: #4f8cff;
+    box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.12);
+}
+#codeAccessButton.btn {
+    padding: 6px 14px;
+    font-size: 0.95rem;
+    border-radius: 6px;
 }

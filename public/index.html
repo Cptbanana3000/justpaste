@@ -47,6 +47,10 @@
 
         <div class="content-wrapper">
             <div id="editor-area" class="card">
+                <div id="code-access-row" class="code-access-row">
+                    <input type="text" id="codeAccessInput" class="code-access-input" placeholder="Enter code to view note">
+                    <button id="codeAccessButton" class="btn btn-secondary">Go</button>
+                </div>
                 <textarea id="textContent" placeholder="Paste your text here... or start typing."></textarea>
                 <div id="edit-code-section" class="input-group" style="display: none;">
                     <label for="editCodeInput">Enter Edit Code:</label>
@@ -65,6 +69,14 @@
             <div id="info-area" class="card" style="display: none;">
                 <h2>Note Saved!</h2>
                 <p id="message" class="success-message"></p>
+                <div class="info-item">
+                    <strong>Access Code:</strong>
+                    <div class="link-container">
+                        <span id="accessCodeDisplay" class="code-display"></span>
+                        <button class="btn-copy" data-clipboard-target="#accessCodeDisplay" title="Copy Access Code">📋</button>
+                    </div>
+                    <small class="warning-text">Save this code to access your note from any device.</small>
+                </div>
                 <div class="info-item">
                     <strong>View Link:</strong>
                     <div class="link-container">
