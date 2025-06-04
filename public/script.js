@@ -385,12 +385,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.showRateLimitAlert = showRateLimitAlert;
     window.hideRateLimitAlert = hideRateLimitAlert;
 
-    // Add size display element
-    const sizeDisplay = document.createElement('div');
-    sizeDisplay.id = 'contentSizeDisplay';
-    sizeDisplay.className = 'content-size-display';
-    textContent.parentNode.insertBefore(sizeDisplay, textContent.nextSibling);
-    
     // Add input event listener for real-time size updates
     textContent.addEventListener('input', updateSizeDisplay);
     
