@@ -117,8 +117,8 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-// Helper function to generate a random 7-character alphanumeric ID
-function generateShortId(length = 7) {
+// Helper function to generate a random 6-character alphanumeric shortId
+function generateShortId(length = 6) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < length; i++) {
@@ -135,26 +135,37 @@ app.post('/api/notes', createNoteLimiter, validateContentSize, async (req, res) 
     const { content } = req.body;
     const editCode = crypto.randomBytes(16).toString('hex');
 
-    // Generate a unique 7-character ID
-    let noteId;
+    // Generate a unique 6-character shortId
+    let shortId;
     let exists = true;
     while (exists) {
-      noteId = generateShortId();
-      const doc = await notesCollection.doc(noteId).get();
-      exists = doc.exists;
+      shortId = generateShortId();
+      const snapshot = await notesCollection.where('shortId', '==', shortId).get();
+      exists = !snapshot.empty;
     }
 
-    // Save the note with the custom ID
+    // Generate a unique 7-character Firestore doc ID
+    let noteId;
+    let idExists = true;
+    while (idExists) {
+      noteId = generateShortId(7);
+      const doc = await notesCollection.doc(noteId).get();
+      idExists = doc.exists;
+    }
+
+    // Save the note with both IDs
     await notesCollection.doc(noteId).set({
       content,
       editCode,
+      shortId,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       size: Buffer.byteLength(content, 'utf8'),
       views: 0
     });
 
     res.status(201).json({
-      id: noteId, // Short, shareable ID
+      id: noteId, // Firestore doc ID
+      shortId: shortId,
       editCode: editCode,
       message: 'Note created successfully.'
     });
@@ -243,6 +254,34 @@ app.put('/api/notes/:id', updateNoteLimiter, validateContentSize, async (req, re
   } catch (error) {
     console.error('Error updating note:', error);
     res.status(500).json({ message: 'Server error while updating note.' });
+  }
+});
+
+// GET /api/notes/s/:shortId - Get a note by its shortId
+app.get('/api/notes/s/:shortId', async (req, res) => {
+  try {
+    const { shortId } = req.params;
+    const snapshot = await notesCollection.where('shortId', '==', shortId).limit(1).get();
+    if (snapshot.empty) {
+      return res.status(404).json({ message: 'Note not found.' });
+    }
+    const doc = snapshot.docs[0];
+    const noteRef = notesCollection.doc(doc.id);
+    // Increment the views field atomically
+    await noteRef.update({ views: admin.firestore.FieldValue.increment(1) });
+    // Get the updated document
+    const updatedDoc = await noteRef.get();
+    const noteData = updatedDoc.data();
+    res.status(200).json({
+      content: noteData.content,
+      id: updatedDoc.id,
+      shortId: noteData.shortId,
+      createdAt: noteData.createdAt ? noteData.createdAt.toDate() : null,
+      views: noteData.views || 1
+    });
+  } catch (error) {
+    console.error('Error fetching note by shortId:', error);
+    res.status(500).json({ message: 'Server error while fetching note.' });
   }
 });
 

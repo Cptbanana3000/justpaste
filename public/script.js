@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentNoteId = null;
     let currentEditCode = null;
+    let currentShortId = null;
 
     const API_BASE_URL = '/api/notes';
 
@@ -106,11 +107,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!basePath.endsWith('/')) {
             basePath += '/';
         }
-        if (accessCodeDisplay) accessCodeDisplay.textContent = data.id || '';
-        viewLinkDisplay.href = `${basePath}#/view/${data.id}`;
-        viewLinkDisplay.textContent = `View: ${basePath}#/view/${data.id}`;
-        editLinkDisplay.href = `${basePath}#/edit/${data.id}`;
-        editLinkDisplay.textContent = `Edit: ${basePath}#/edit/${data.id}`;
+        if (accessCodeDisplay) accessCodeDisplay.textContent = data.shortId || data.id || '';
+        // Use shortId for links if available
+        const viewPath = data.shortId ? `${basePath}#/${data.shortId}` : `${basePath}#/view/${data.id}`;
+        const editPath = data.shortId ? `${basePath}#/${data.shortId}/edit` : `${basePath}#/edit/${data.id}`;
+        viewLinkDisplay.href = viewPath;
+        viewLinkDisplay.textContent = `View: ${viewPath}`;
+        editLinkDisplay.href = editPath;
+        editLinkDisplay.textContent = `Edit: ${editPath}`;
         editCodeDisplay.textContent = data.editCode || " (Not available)";
         newNoteButton.style.display = 'inline-block';
         clearError();
@@ -144,6 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             viewsDisplay.textContent = '';
         }
         currentNoteId = noteData.id;
+        currentShortId = noteData.shortId;
         clearError();
         if (codeAccessRow) codeAccessRow.style.display = 'none';
     }
@@ -218,10 +223,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             currentNoteId = data.id;
             currentEditCode = data.editCode; 
-
-            showInfoView({ id: data.id, editCode: data.editCode, message: data.message || 'Note saved successfully!' });
-            window.location.hash = `#/details/${data.id}`;
-
+            currentShortId = data.shortId;
+            // Save details to sessionStorage for reload-safe details page
+            sessionStorage.setItem('justpaste_lastNoteDetails', JSON.stringify({
+                id: data.id,
+                shortId: data.shortId,
+                editCode: data.editCode,
+                message: data.message || 'Note saved successfully!'
+            }));
+            showInfoView({ id: data.id, shortId: data.shortId, editCode: data.editCode, message: data.message || 'Note saved successfully!' });
+            window.location.hash = `#/details/${data.shortId}`;
         } catch (error) {
             console.error('Error saving note:', error);
             showError(`Failed to save note: ${error.message}`);
@@ -313,25 +324,79 @@ document.addEventListener('DOMContentLoaded', () => {
         const hash = window.location.hash;
         clearError(); 
 
+        // Details page: #/details/:shortId
+        if (hash.startsWith('#/details/')) {
+            const shortIdFromHash = hash.substring('#/details/'.length);
+            // Try to get details from sessionStorage
+            const detailsRaw = sessionStorage.getItem('justpaste_lastNoteDetails');
+            let details = null;
+            try {
+                details = detailsRaw ? JSON.parse(detailsRaw) : null;
+            } catch (e) { details = null; }
+            if (details && details.shortId === shortIdFromHash) {
+                showInfoView(details);
+            } else {
+                // If not found, redirect to view page
+                window.location.hash = `#/${shortIdFromHash}`;
+            }
+            return;
+        }
+        // Support legacy routes
         if (hash.startsWith('#/view/')) {
             const id = hash.substring('#/view/'.length);
-            fetchNote(id);
+            // If id looks like a shortId (6 chars, alphanumeric), fetch by shortId
+            if (/^[A-Za-z0-9]{6}$/.test(id)) {
+                fetchNoteByShortId(id);
+            } else {
+                fetchNote(id);
+            }
         } else if (hash.startsWith('#/edit/')) {
             const id = hash.substring('#/edit/'.length);
-            fetchNote(id, true); 
-        } else if (hash.startsWith('#/details/')) {
-            const idFromHash = hash.substring('#/details/'.length);
-            if (currentNoteId === idFromHash && currentEditCode) {
-                 showInfoView({id: currentNoteId, editCode: currentEditCode, message: "Note details:"});
+            if (/^[A-Za-z0-9]{6}$/.test(id)) {
+                fetchNoteByShortId(id, true);
             } else {
-                console.warn("Navigated to details page without fresh save context or editCode. Redirecting to view.");
-                window.location.hash = `#/view/${idFromHash}`;
+                fetchNote(id, true);
             }
-        }
-        else { 
+        } else if (hash.match(/^#\/[A-Za-z0-9]{6}(\/edit)?$/)) {
+            // New shortId routes: #/JSU2hw or #/JSU2hw/edit
+            const match = hash.match(/^#\/([A-Za-z0-9]{6})(\/edit)?$/);
+            if (match) {
+                const shortId = match[1];
+                const isEdit = !!match[2];
+                fetchNoteByShortId(shortId, isEdit);
+            }
+        } else { 
             currentNoteId = null;
             currentEditCode = null;
+            currentShortId = null;
+            sessionStorage.removeItem('justpaste_lastNoteDetails');
             showEditorView();
+        }
+    }
+
+    // --- Fetch note by shortId ---
+    async function fetchNoteByShortId(shortId, forEditing = false) {
+        if (!shortId) return;
+        showLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/s/${shortId}`);
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP error! status: ${response.status}`);
+            }
+            currentNoteId = data.id;
+            currentShortId = data.shortId;
+            if (forEditing) {
+                showEditView(data.content);
+            } else {
+                showNoteView(data);
+            }
+        } catch (error) {
+            console.error('Error fetching note by shortId:', error);
+            showError(`Failed to fetch note: ${error.message}`);
+            showEditorView();
+        } finally {
+            showLoading(false);
         }
     }
 
@@ -340,9 +405,11 @@ document.addEventListener('DOMContentLoaded', () => {
     updateButton.addEventListener('click', updateNote);
     
     newNoteButton.addEventListener('click', () => {
+        sessionStorage.removeItem('justpaste_lastNoteDetails');
         window.location.hash = '#/'; 
     });
     createNewNoteFromViewButton.addEventListener('click', () => {
+        sessionStorage.removeItem('justpaste_lastNoteDetails');
         window.location.hash = '#/';
     });
     editThisNoteButton.addEventListener('click', () => {
@@ -440,6 +507,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 'Enter') {
                 codeAccessButton.click();
             }
+        });
+    }
+
+    // Add event listener for the new 'View Note' button in info-area
+    const viewNoteFromInfoButton = document.getElementById('viewNoteFromInfoButton');
+    if (viewNoteFromInfoButton) {
+        viewNoteFromInfoButton.addEventListener('click', () => {
+            if (currentShortId) {
+                window.location.hash = `#/${currentShortId}`;
+            }
+        });
+    }
+
+    // Also clear when clicking 'Create Another Note' in info-area
+    const createNewFromInfoButton = document.getElementById('createNewFromInfoButton');
+    if (createNewFromInfoButton) {
+        createNewFromInfoButton.addEventListener('click', () => {
+            sessionStorage.removeItem('justpaste_lastNoteDetails');
+            window.location.hash = '#/';
         });
     }
 });
