@@ -604,3 +604,14 @@ a:hover {
 .footer-links a:hover {
     color: #82aaff;
 }
+
+
+@media (max-width: 600px) {
+    .note-content-box a {
+        font-size: 0.75em;
+    }
+    .note-content-box {
+        font-size: 0.75em;
+        padding: 8px;
+    }
+}
