@@ -608,10 +608,10 @@ a:hover {
 
 @media (max-width: 600px) {
     .note-content-box a {
-        font-size: 0.75em;
+        font-size: 0.85em;
     }
     .note-content-box {
-        font-size: 0.75em;
+        font-size: 0.85em;
         padding: 8px;
     }
 }
