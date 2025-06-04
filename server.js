@@ -6,6 +6,7 @@ const path = require('path');
 const admin = require('firebase-admin');
 const crypto = require('crypto'); // For generating editCode
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -84,6 +85,20 @@ const db = admin.firestore();
 const notesCollection = db.collection('notes'); // Define your Firestore collection name
 
 // Middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:"],
+            connectSrc: ["'self'"],
+        },
+    },
+    crossOriginEmbedderPolicy: false, // Required for Firebase
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Required for Firebase
+}));
 app.use(cors()); // Enable Cross-Origin Resource Sharing
 app.use(express.json({ limit: '200kb' })); // Set higher than our own limit so our middleware can handle it
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from 'public' directory
