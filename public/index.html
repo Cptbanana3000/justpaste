@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/"> <!-- ** ADD THIS LINE ** -->
     <title>JustPaste - Quickly Save & Share Text Snippets</title>
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-SR0YFBHC2N"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-SR0YFBHC2N');
-</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SR0YFBHC2N"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-SR0YFBHC2N');
+    </script>
     <meta name="description" content="JustPaste lets you quickly save and share plain text notes, code, and snippets. No sign-up required. Fast, simple, and privacy-friendly.">
     <link rel="canonical" href="https://justpaste.click/">
     <meta property="og:title" content="JustPaste - Quickly Save & Share Text Snippets">
@@ -23,9 +23,9 @@
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="JustPaste - Quickly Save & Share Text Snippets">
     <meta name="twitter:description" content="JustPaste lets you quickly save and share plain text notes, code, and snippets. No sign-up required. Fast, simple, and privacy-friendly.">
-     
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css"> <!-- This will now resolve from the base href -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
 </head>
 <body>
@@ -37,13 +37,17 @@
                 <div class="alert-title">Rate Limit Reached</div>
                 <div class="alert-message">You've reached the maximum number of requests. Please try again later.</div>
             </div>
-            <button class="close-button" onclick="hideRateLimitAlert()">×</button>
+            <button class="close-button" onclick="hideRateLimitAlert()">×</button> 
+            <!-- Make sure hideRateLimitAlert() is defined globally or change this -->
         </div>
 
         <header class="app-header">
             <h1>📝 JustPaste</h1>
             <p class="subtitle">Quickly save and share text snippets.</p>
         </header>
+
+        <!-- AdSense Top Banner Placeholder (if you use it) -->
+        <!-- <div class="ad-banner ad-banner-top"><p>Top Ad Banner Area</p></div> -->
 
         <div class="content-wrapper">
             <div id="editor-area" class="card">
@@ -62,7 +66,7 @@
                         <button id="updateButton" class="btn btn-warning" style="display: none;">Update Note</button>
                         <button id="newNoteButton" class="btn btn-secondary" style="display: none;">Create New Note</button>
                     </div>
-                    <div id="contentSizeDisplay" class="content-size-display"></div>
+                    <div id="contentSizeDisplay" class="content-size-display">0KB / 20KB</div>
                 </div>
             </div>
 
@@ -80,14 +84,14 @@
                 <div class="info-item">
                     <strong>View Link:</strong>
                     <div class="link-container">
-                        <a id="viewLink" href="#" target="_blank"></a>
+                        <a id="viewLink" href="#" target="_blank"></a> <!-- Target _blank for external-like behavior -->
                         <button class="btn-copy" data-clipboard-target="#viewLink" title="Copy View Link">📋</button>
                     </div>
                 </div>
                 <div class="info-item">
                     <strong>Edit Link:</strong>
                     <div class="link-container">
-                        <a id="editLink" href="#"></a>
+                        <a id="editLink" href="#"></a> <!-- This will be handled by SPA router -->
                         <button class="btn-copy" data-clipboard-target="#editLink" title="Copy Edit Link">📋</button>
                     </div>
                 </div>
@@ -99,6 +103,10 @@
                     </div>
                     <small class="warning-text">Keep this code secret! You'll need it to edit your note.</small>
                 </div>
+                <!-- View count display for info page -->
+                <div class="info-item" id="initialViewCountRow" style="display:none;">
+                    <strong>Views:</strong> <span id="initialViewCountDisplay">0</span>
+                </div>
                 <div class="button-group">
                     <button id="viewNoteFromInfoButton" class="btn btn-primary">View Note</button>
                     <button id="createNewFromInfoButton" class="btn btn-secondary">Create Another Note</button>
@@ -108,7 +116,10 @@
             <div id="view-area" class="card" style="display: none;">
                 <h2>View Note</h2>
                 <pre id="noteContentDisplay" class="note-content-box"></pre>
-                <p class="timestamp"><em id="noteTimestamp"></em></p>
+                <div class="note-meta"> <!-- Wrapper for timestamp and views -->
+                    <p class="timestamp"><em id="noteTimestamp"></em></p>
+                    <p class="view-count">Views: <span id="noteViewCountDisplay">0</span></p>
+                </div>
                 <div class="button-group">
                     <button id="editThisNoteButton" class="btn btn-secondary">Edit This Note</button>
                     <button id="createNewNoteFromViewButton" class="btn btn-primary">Create New Note</button>
@@ -122,59 +133,63 @@
             <div id="error-message" class="error-text alert alert-danger" style="display: none;"></div>
         </div>
         
+        <!-- AdSense Bottom Banner Placeholder (if you use it) -->
+        <!-- <div class="ad-banner ad-banner-bottom"><p>Bottom Ad Banner Area</p></div> -->
+
         <footer class="app-footer">
             <div class="copyright-text">&copy; <span id="currentYear"></span> JustPaste. All rights reserved.</div>
             <div class="footer-links">
-                <a href="terms.html">Terms of Service</a>
-                <a href="privacy.html">Privacy Policy</a>
-                <a href="dmca.html">DMCA</a>
-                <a href="acceptable-use.html">Acceptable Use Policy</a>
+                <a href="/terms.html">Terms of Service</a> <!-- Use absolute paths for static pages -->
+                <a href="/privacy.html">Privacy Policy</a>
+                <a href="/dmca.html">DMCA</a>
+                <a href="/acceptable-use.html">Acceptable Use Policy</a>
             </div>
         </footer>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js"></script> <!-- This will now resolve from the base href -->
     <script>
-        // Small script for footer year and clipboard
         document.getElementById('currentYear').textContent = new Date().getFullYear();
 
+        // Clipboard copy functionality
         document.querySelectorAll('.btn-copy').forEach(button => {
             button.addEventListener('click', function() {
                 const targetSelector = this.getAttribute('data-clipboard-target');
                 const targetElement = document.querySelector(targetSelector);
                 let textToCopy = '';
-
                 if (targetElement) {
-                    if (targetElement.tagName === 'A') {
-                        textToCopy = targetElement.href;
-                    } else if (targetElement.tagName === 'SPAN') {
-                        textToCopy = targetElement.textContent;
-                    }
+                    if (targetElement.tagName === 'A') textToCopy = targetElement.href;
+                    else if (targetElement.tagName === 'SPAN') textToCopy = targetElement.textContent;
                 }
-                
                 if (textToCopy) {
                     const textArea = document.createElement('textarea');
                     textArea.value = textToCopy;
                     document.body.appendChild(textArea);
                     textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        alert('Copied to clipboard!'); // Replace with a nicer notification if desired
-                    } catch (err) {
-                        console.error('Failed to copy: ', err);
-                        alert('Failed to copy. Please copy manually.');
-                    }
+                    try { document.execCommand('copy'); alert('Copied to clipboard!'); } 
+                    catch (err) { console.error('Failed to copy: ', err); alert('Failed to copy.'); }
                     document.body.removeChild(textArea);
                 }
             });
         });
-        // Add event listener for the new button in info-area
-        const createNewFromInfoButton = document.getElementById('createNewFromInfoButton');
-        if (createNewFromInfoButton) {
-            createNewFromInfoButton.addEventListener('click', () => {
-                window.location.hash = '#/'; 
-            });
+
+        // Rate limit alert hide function (if you keep the inline onclick)
+        // It's better to move this to script.js and use event listeners
+        function hideRateLimitAlert() {
+            const alert = document.getElementById('rateLimitAlert');
+            if (alert) {
+                alert.classList.remove('show');
+                setTimeout(() => { alert.style.display = 'none'; }, 300);
+            }
         }
+        // Attach event listener for rate limit close button properly
+        const rateLimitCloseButton = document.querySelector('#rateLimitAlert .close-button');
+        if (rateLimitCloseButton) {
+            rateLimitCloseButton.addEventListener('click', hideRateLimitAlert);
+        }
+
+        // Note: The navigateTo function will be defined in the main script.js
+        // The event listeners for createNewFromInfoButton, etc., will be set up in script.js
     </script>
 </body>
 </html>
