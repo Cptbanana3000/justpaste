@@ -51,13 +51,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX_CONTENT_SIZE = 20 * 1024; // 20KB in bytes
     const MAX_CONTENT_SIZE_DISPLAY = '20KB';
 
+    function showAds(visible) {
+        const displayValue = visible ? 'flex' : 'none'; // Use 'flex' as per your CSS for ad-banner
+        if (topAdBanner) topAdBanner.style.display = displayValue;
+        if (bottomAdBanner) bottomAdBanner.style.display = displayValue;
+    }
+
+
     // --- Helper Functions ---
     function setActiveView(activeViewElement) {
         editorArea.style.display = 'none';
         infoArea.style.display = 'none';
         viewArea.style.display = 'none';
         if (codeAccessRow) codeAccessRow.style.display = 'none';
-        if (activeViewElement) activeViewElement.style.display = 'block';
+        
+        // Hide ads by default when switching views
+        showAds(false);
+
+        if (activeViewElement) {
+            activeViewElement.style.display = 'block';
+        }
     }
 
     function showLoadingState(isLoading) {
@@ -114,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function showEditorView() {
         setActiveView(editorArea);
         if (codeAccessRow) codeAccessRow.style.display = 'flex';
+        showAds(false);
         textContent.value = '';
         editCodeInput.value = '';
         textContent.disabled = false;
@@ -126,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showInfoView(data) { // data: { id, shortId, editCode, message, viewCount }
         setActiveView(infoArea);
+        showAds(false);
         messageDisplay.textContent = data.message || 'Note saved successfully!';
         
         // Path-based URLs
@@ -153,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showNoteView(noteData) { // noteData: { content, id, shortId, createdAt, views }
         setActiveView(viewArea);
+        showAds(true);
         noteContentDisplay.innerHTML = linkify(noteData.content);
         if (noteData.createdAt) {
             noteTimestampDisplay.textContent = `Created: ${new Date(noteData.createdAt).toLocaleString()}`;
@@ -168,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showEditView(noteContent) {
         setActiveView(editorArea);
+        showAds(false);
         if (codeAccessRow) codeAccessRow.style.display = 'none';
         textContent.value = noteContent;
         saveButton.style.display = 'none';
