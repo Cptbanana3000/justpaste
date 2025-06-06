@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const createNewFromInfoButton = document.getElementById('createNewFromInfoButton');
     const viewNoteFromInfoButton = document.getElementById('viewNoteFromInfoButton');
 
+    const topAdBanner = document.getElementById('top-ad-banner');
+    const bottomAdBanner = document.getElementById('bottom-ad-banner');
+
 
     const editorArea = document.getElementById('editor-area');
     const infoArea = document.getElementById('info-area');

@@ -85,20 +85,51 @@ const db = admin.firestore();
 const notesCollection = db.collection('notes'); // Define your Firestore collection name
 
 // Middleware
-app.use(helmet({
+app.use(
+  helmet({
     contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://www.google-analytics.com","https://*.analytics.google.com"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            fontSrc: ["'self'", "https://fonts.gstatic.com"],
-            imgSrc: ["'self'", "data:", "https://www.google-analytics.com", "https://*.google-analytics.com","https://*.analytics.google.com"],
-            connectSrc: ["'self'", "https://*.google-analytics.com","https://*.analytics.google.com","https://*.firebaseio.com","https://firestore.googleapis.com"],
-        },
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'", "'unsafe-inline'",
+          "https://www.googletagmanager.com", "https://*.google-analytics.com", "https://*.analytics.google.com",
+          "https://pagead2.googlesyndication.com", "https://*.googlesyndication.com",
+          "https://*.doubleclick.net", "https://partner.googleadservices.com",
+          "https://tpc.googlesyndication.com", "https://googleads.g.doubleclick.net",
+          "https://ep1.adtrafficquality.google", // The domain from the previous error
+          "https://ep2.adtrafficquality.google"
+        ],
+        styleSrc: [
+          "'self'", "'unsafe-inline'", "https://fonts.googleapis.com",
+          "https://pagead2.googlesyndication.com"
+        ],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: [
+          "'self'", "data:", "https://www.google-analytics.com", "https://*.google-analytics.com",
+          "https://*.analytics.google.com", "https://pagead2.googlesyndication.com",
+          "https://*.googlesyndication.com", "https://*.g.doubleclick.net", "https://*.google.com",
+          "https://ep1.adtrafficquality.google", "https://ep2.adtrafficquality.google"
+        ],
+        frameSrc: [
+          "'self'", "https://*.doubleclick.net", "https://*.google.com",
+          "https://googleads.g.doubleclick.net", "https://tpc.googlesyndication.com",
+          "https://pagead2.googlesyndication.com", "https://*.googlesyndication.com",
+          "https://ep1.adtrafficquality.google", "https://ep2.adtrafficquality.google"
+        ],
+        connectSrc: [
+          "'self'",
+          "https://*.google-analytics.com", "https://*.analytics.google.com",
+          "https://firestore.googleapis.com", "https://*.firebaseio.com",
+          "https://pagead2.googlesyndication.com", "https://*.googlesyndication.com",
+          "https://*.g.doubleclick.net", "https://googleads.g.doubleclick.net",
+          "https://ep1.adtrafficquality.google" // ** FIX: Added new domain for ad traffic quality **
+        ],
+      },
     },
-    crossOriginEmbedderPolicy: false, // Required for Firebase
-    crossOriginResourcePolicy: { policy: "cross-origin" }, // Required for Firebase
-}));
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 app.use(cors()); // Enable Cross-Origin Resource Sharing
 app.use(express.json({ limit: '200kb' })); // Set higher than our own limit so our middleware can handle it
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from 'public' directory
