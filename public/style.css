@@ -672,3 +672,190 @@ a:hover {
     border-radius: 6px;
 }
 
+/* Editor Tabs */
+.editor-tabs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+.tab-button {
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    color: #b0b0b0;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.tab-button:hover {
+    color: #e0e0e0;
+}
+
+.tab-button.active {
+    color: #4f8cff;
+    border-bottom: 2px solid #4f8cff;
+}
+
+.markdown-guide-link {
+    margin-left: auto;
+    color: #b0b0b0;
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: color 0.2s ease;
+}
+
+.markdown-guide-link:hover {
+    color: #e0e0e0;
+}
+
+.tab-content {
+    position: relative;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/* Markdown Preview and Content */
+.markdown-preview,
+.markdown-content {
+    width: 98vw;
+    max-width: 879px;
+    min-height: 480px;
+    padding: 15px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 1rem;
+    line-height: 1.6;
+    background-color: #181a1b;
+    color: #e0e0e0;
+    overflow-wrap: break-word;
+}
+
+/* Markdown Styling */
+.markdown-preview h1,
+.markdown-content h1 {
+    font-size: 2em;
+    margin: 0.67em 0;
+    color: #e0e0e0;
+}
+
+.markdown-preview h2,
+.markdown-content h2 {
+    font-size: 1.5em;
+    margin: 0.83em 0;
+    color: #e0e0e0;
+}
+
+.markdown-preview h3,
+.markdown-content h3 {
+    font-size: 1.17em;
+    margin: 1em 0;
+    color: #e0e0e0;
+}
+
+.markdown-preview p,
+.markdown-content p {
+    margin: 1em 0;
+}
+
+.markdown-preview ul,
+.markdown-content ul,
+.markdown-preview ol,
+.markdown-content ol {
+    margin: 1em 0;
+    padding-left: 2em;
+}
+
+.markdown-preview li,
+.markdown-content li {
+    margin: 0.5em 0;
+}
+
+.markdown-preview blockquote,
+.markdown-content blockquote {
+    margin: 1em 0;
+    padding: 0.5em 1em;
+    border-left: 4px solid #4f8cff;
+    background-color: #23272a;
+}
+
+.markdown-preview code,
+.markdown-content code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    padding: 0.2em 0.4em;
+    background-color: #23272a;
+    border-radius: 3px;
+}
+
+.markdown-preview pre,
+.markdown-content pre {
+    margin: 1em 0;
+    padding: 1em;
+    background-color: #23272a;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+.markdown-preview pre code,
+.markdown-content pre code {
+    padding: 0;
+    background-color: transparent;
+}
+
+.markdown-preview a,
+.markdown-content a {
+    color: #4f8cff;
+    text-decoration: none;
+}
+
+.markdown-preview a:hover,
+.markdown-content a:hover {
+    text-decoration: underline;
+}
+
+.markdown-preview table,
+.markdown-content table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+}
+
+.markdown-preview th,
+.markdown-content th,
+.markdown-preview td,
+.markdown-content td {
+    border: 1px solid #333;
+    padding: 0.5em;
+}
+
+.markdown-preview th,
+.markdown-content th {
+    background-color: #23272a;
+}
+
+.markdown-preview img,
+.markdown-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+.markdown-preview hr,
+.markdown-content hr {
+    border: none;
+    border-top: 1px solid #333;
+    margin: 1em 0;
+}
+
+

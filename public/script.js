@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const editThisNoteButton = document.getElementById('editThisNoteButton');
     const createNewFromInfoButton = document.getElementById('createNewFromInfoButton');
     const viewNoteFromInfoButton = document.getElementById('viewNoteFromInfoButton');
+    
+    
 
     const topAdBanner = document.getElementById('top-ad-banner');
     const bottomAdBanner = document.getElementById('bottom-ad-banner');
@@ -41,6 +43,28 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const contentSizeDisplay = document.getElementById('contentSizeDisplay');
 
+    // Add new element getters for tabbed interface
+    const writeTab = document.getElementById('write-tab');
+    const previewTab = document.getElementById('preview-tab');
+    const editorPreview = document.getElementById('editorPreview');
+    const tabButtons = document.querySelectorAll('.tab-button');
+
+    // Configure marked.js
+    marked.setOptions({
+        highlight: function(code, lang) {
+            if (lang && hljs.getLanguage(lang)) {
+                try {
+                    return hljs.highlight(code, { language: lang }).value;
+                } catch (err) {
+                    console.error('Error highlighting code:', err);
+                }
+            }
+            return code;
+        },
+        breaks: true,
+        gfm: true
+    });
+
     // --- State Variables ---
     let currentNoteId = null;       // Firestore document ID (long ID)
     let currentShortId = null;      // User-facing short ID / access code
@@ -59,6 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (topAdBanner) topAdBanner.style.display = displayValue;
         if (bottomAdBanner) bottomAdBanner.style.display = displayValue;
     }
+
+    
     
 
 
@@ -154,6 +180,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if(newNoteButton) newNoteButton.style.display = 'none';
         editCodeSection.style.display = 'none';
         updateSizeDisplay();
+        
+        // Reset to Write tab
+        switchTab('write');
     }
 
     function showInfoView(data) { // data: { id, shortId, editCode, message, viewCount }
@@ -184,38 +213,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if(viewNoteFromInfoButton) viewNoteFromInfoButton.style.display = 'inline-block';
     }
 
-    function showNoteView(noteData) { // noteData: { content, id, shortId, createdAt, views }
+    function showNoteView(noteData) {
         setActiveView(viewArea);
         showAds(true);
         
-    
-        noteContentDisplay.textContent = noteData.content || '';
+        // Parse and render the Markdown content
+        noteContentDisplay.innerHTML = marked.parse(noteData.content || '');
         
-        // 2. Define a function that will try to apply the highlighting.
-        const tryToHighlight = (retriesLeft = 20) => {
-            // Check if highlight.js is loaded and ready
-            if (window.hljs) {
-                // It's ready! Apply highlighting.
-                hljs.highlightElement(noteContentDisplay);
-                
-                // Now that it's highlighted, get the resulting HTML.
-                const highlightedHtml = noteContentDisplay.innerHTML;
-                
-                // Run linkify on the highlighted HTML to make URLs clickable.
-                noteContentDisplay.innerHTML = linkify(highlightedHtml);
-            } else if (retriesLeft > 0) {
-                // It's not ready yet. Wait 50ms and try again.
-                // This gives the external script time to download and execute.
-                setTimeout(() => tryToHighlight(retriesLeft - 1), 50);
-            } else {
-                // We've waited long enough. Log an error and fallback to just linkifying.
-                console.error("Highlight.js did not load in time. Displaying plain text.");
-                noteContentDisplay.innerHTML = linkify(noteContentDisplay.textContent);
-            }
-        };
+        // Apply syntax highlighting to code blocks
+        noteContentDisplay.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
+        });
 
-        // 3. Start the process.
-        tryToHighlight();
         if (noteData.createdAt) {
             noteTimestampDisplay.textContent = `Created: ${new Date(noteData.createdAt).toLocaleString()}`;
         } else {
@@ -225,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         currentNoteId = noteData.id;
         currentShortId = noteData.shortId;
-        // currentEditCode is not set here as it's not fetched for viewing
     }
 
     function showEditView(noteContent) {
@@ -240,6 +248,9 @@ document.addEventListener('DOMContentLoaded', () => {
         editCodeInput.value = currentEditCode || ''; 
         textContent.disabled = false;
         updateSizeDisplay();
+        
+        // Reset to Write tab
+        switchTab('write');
     }
 
     function updateSizeDisplay() {
@@ -494,6 +505,52 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target.origin === window.location.origin && (currentShortId || currentNoteId)) { 
           e.preventDefault(); navigateTo(new URL(e.target.href).pathname);
       }
+    });
+
+    // --- Tab Switching Functions ---
+    function switchTab(tabName) {
+        // Update tab buttons
+        tabButtons.forEach(button => {
+            button.classList.toggle('active', button.dataset.tab === tabName);
+        });
+
+        // Update tab content
+        writeTab.classList.toggle('active', tabName === 'write');
+        previewTab.classList.toggle('active', tabName === 'preview');
+
+        // If switching to preview, update the preview content
+        if (tabName === 'preview') {
+            updatePreview();
+        }
+    }
+
+    function updatePreview() {
+        const content = textContent.value;
+        editorPreview.innerHTML = marked.parse(content);
+        
+        // Apply syntax highlighting to code blocks
+        editorPreview.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
+        });
+    }
+
+    // Add event listeners for tab switching
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            switchTab(button.dataset.tab);
+        });
+    });
+
+    // Update preview when content changes (with debounce)
+    let previewTimeout;
+    textContent.addEventListener('input', () => {
+        clearTimeout(previewTimeout);
+        previewTimeout = setTimeout(() => {
+            if (previewTab.classList.contains('active')) {
+                updatePreview();
+            }
+            updateSizeDisplay();
+        }, 300);
     });
 
     // Initial page load & size display
