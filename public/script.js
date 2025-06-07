@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (topAdBanner) topAdBanner.style.display = displayValue;
         if (bottomAdBanner) bottomAdBanner.style.display = displayValue;
     }
+    
 
 
     // --- Helper Functions ---
@@ -86,15 +87,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    function linkify(inputText) {
-        if (!inputText) return '';
+    function linkify(inputTextOrHtml) {
+        if (!inputTextOrHtml) return '';
+        
+        // This regular expression finds URLs.
         const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|(\bwww\.[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-        const tempDiv = document.createElement('div');
-        tempDiv.textContent = inputText;
-        const sanitizedText = tempDiv.innerHTML;
-        return sanitizedText.replace(urlRegex, function(url) {
+        
+        // We directly replace URLs found in the string. 
+        // The initial content was already safely inserted into the DOM using .textContent,
+        // so we don't need to re-sanitize here. We are just adding <a> tags.
+        return inputTextOrHtml.replace(urlRegex, function(url) {
+            // This check prevents us from turning a URL that's already inside an <a> tag's href
+            // into another link. It's a simple but effective guard.
+            if (inputTextOrHtml.includes(`href="${url}"`)) {
+                return url; // It's already a link, so don't change it.
+            }
+    
             let fullUrl = url;
-            if (!url.match(/^[a-zA-Z]+:\/\//)) { fullUrl = 'http://' + url; }
+            // If the URL starts with 'www.' but not 'http://' or 'https://', add 'http://'
+            if (!url.match(/^[a-zA-Z]+:\/\//)) { 
+                fullUrl = 'http://' + url;
+            }
+    
+            // Return the HTML for the clickable link
             return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${url}</a>`;
         });
     }
@@ -172,7 +187,35 @@ document.addEventListener('DOMContentLoaded', () => {
     function showNoteView(noteData) { // noteData: { content, id, shortId, createdAt, views }
         setActiveView(viewArea);
         showAds(true);
-        noteContentDisplay.innerHTML = linkify(noteData.content);
+        
+    
+        noteContentDisplay.textContent = noteData.content || '';
+        
+        // 2. Define a function that will try to apply the highlighting.
+        const tryToHighlight = (retriesLeft = 20) => {
+            // Check if highlight.js is loaded and ready
+            if (window.hljs) {
+                // It's ready! Apply highlighting.
+                hljs.highlightElement(noteContentDisplay);
+                
+                // Now that it's highlighted, get the resulting HTML.
+                const highlightedHtml = noteContentDisplay.innerHTML;
+                
+                // Run linkify on the highlighted HTML to make URLs clickable.
+                noteContentDisplay.innerHTML = linkify(highlightedHtml);
+            } else if (retriesLeft > 0) {
+                // It's not ready yet. Wait 50ms and try again.
+                // This gives the external script time to download and execute.
+                setTimeout(() => tryToHighlight(retriesLeft - 1), 50);
+            } else {
+                // We've waited long enough. Log an error and fallback to just linkifying.
+                console.error("Highlight.js did not load in time. Displaying plain text.");
+                noteContentDisplay.innerHTML = linkify(noteContentDisplay.textContent);
+            }
+        };
+
+        // 3. Start the process.
+        tryToHighlight();
         if (noteData.createdAt) {
             noteTimestampDisplay.textContent = `Created: ${new Date(noteData.createdAt).toLocaleString()}`;
         } else {

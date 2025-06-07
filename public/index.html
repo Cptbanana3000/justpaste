@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <base href="/"> <!-- ** ADD THIS LINE ** -->
-    <title>JustPaste - Quickly Save & Share Text Snippets</title>
+    <title>Flingnote - Quickly Save & Share Text Snippets</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2387807071256876"
      crossorigin="anonymous"></script>
     <!-- Google tag (gtag.js) -->
@@ -15,20 +15,25 @@
       gtag('js', new Date());
       gtag('config', 'G-SR0YFBHC2N');
     </script>
-    <meta name="description" content="JustPaste lets you quickly save and share plain text notes, code, and snippets. No sign-up required. Fast, simple, and privacy-friendly.">
-    <link rel="canonical" href="https://justpaste.click/">
-    <meta property="og:title" content="JustPaste - Quickly Save & Share Text Snippets">
-    <meta property="og:description" content="JustPaste lets you quickly save and share plain text notes, code, and snippets. No sign-up required. Fast, simple, and privacy-friendly.">
+    <meta name="description" content="Flingnote lets you quickly save and share plain text notes, code, and snippets. No sign-up required. Fast, simple, and privacy-friendly.">
+    <link rel="canonical" href="https://flingnote.click/">
+    <meta property="og:title" content="Flingnote - Quickly Save & Share Text Snippets">
+    <meta property="og:description" content="Flingnote lets you quickly save and share plain text notes, code, and snippets. No sign-up required. Fast, simple, and privacy-friendly.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://justpaste.click/">
+    <meta property="og:url" content="https://flingnote.click/">
     
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="JustPaste - Quickly Save & Share Text Snippets">
-    <meta name="twitter:description" content="JustPaste lets you quickly save and share plain text notes, code, and snippets. No sign-up required. Fast, simple, and privacy-friendly.">
+    <meta name="twitter:title" content="Flingnote - Quickly Save & Share Text Snippets">
+    <meta name="twitter:description" content="Flingnote lets you quickly save and share plain text notes, code, and snippets. No sign-up required. Fast, simple, and privacy-friendly.">
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <link rel="stylesheet" href="style.css"> <!-- This will now resolve from the base href -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="manifest" href="/assets/site.webmanifest">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
 </head>
 <body>
     <div class="main-container">
@@ -44,10 +49,10 @@
         </div>
 
         <header class="app-header">
-            <h1>📝 JustPaste</h1>
+            <h1><img src="./assets/logo.png" alt="Flingnote" id="site-logo" ></h1>
             <p class="subtitle">Quickly save and share text snippets.</p>
             <p style="font-size: 0.9em; margin-top: 10px;">
-                <a href="https://www.justpaste.click/eHuoMU">See an Example Paste</a>
+                <a href="https://www.flingnote.click/eHuoMU">See an Example Paste</a>
             </p>
         </header>
 
@@ -113,8 +118,8 @@
                     <strong>Views:</strong> <span id="initialViewCountDisplay">0</span>
                 </div>
                 <div class="button-group">
-                    <button id="viewNoteFromInfoButton" class="btn btn-primary">View Note</button>
-                    <button id="createNewFromInfoButton" class="btn btn-secondary">Create Another Note</button>
+                    <!-- <button id="viewNoteFromInfoButton" class="btn btn-primary">View Note</button> -->
+                    <button id="createNewFromInfoButton" class="btn btn-secondary">New</button>
                 </div>
             </div>
 
@@ -126,8 +131,8 @@
                     <p class="view-count">Views: <span id="noteViewCountDisplay">0</span></p>
                 </div>
                 <div class="button-group">
-                    <button id="editThisNoteButton" class="btn btn-secondary">Edit This Note</button>
-                    <button id="createNewNoteFromViewButton" class="btn btn-primary">Create New Note</button>
+                    <button id="editThisNoteButton" class="btn btn-secondary">Edit Note</button>
+                    <button id="createNewNoteFromViewButton" class="btn btn-primary">New</button>
                 </div>
             </div>
 
@@ -142,7 +147,7 @@
         <!-- <div class="ad-banner ad-banner-bottom"><p>Bottom Ad Banner Area</p></div> -->
 
         <footer class="app-footer">
-            <div class="copyright-text">&copy; <span id="currentYear"></span> JustPaste. All rights reserved.</div>
+            <div class="copyright-text">&copy; <span id="currentYear"></span> Flingnote. All rights reserved.</div>
             <div class="footer-links">
                 <a href="/terms.html">Terms of Service</a> <!-- Use absolute paths for static pages -->
                 <a href="/privacy.html">Privacy Policy</a>
@@ -152,7 +157,10 @@
         </footer>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
     <script src="script.js"></script> <!-- This will now resolve from the base href -->
+    
     <script>
         document.getElementById('currentYear').textContent = new Date().getFullYear();
 

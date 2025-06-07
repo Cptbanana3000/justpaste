@@ -97,18 +97,23 @@ app.use(
           "https://*.doubleclick.net", "https://partner.googleadservices.com",
           "https://tpc.googlesyndication.com", "https://googleads.g.doubleclick.net",
           "https://ep1.adtrafficquality.google", // The domain from the previous error
-          "https://ep2.adtrafficquality.google"
+          "https://ep2.adtrafficquality.google",
+          "https://cdnjs.cloudflare.com",
+          "https://cdn.jsdelivr.net"
         ],
         styleSrc: [
           "'self'", "'unsafe-inline'", "https://fonts.googleapis.com",
-          "https://pagead2.googlesyndication.com"
+          "https://pagead2.googlesyndication.com",
+          "https://cdnjs.cloudflare.com"
         ],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: [
           "'self'", "data:", "https://www.google-analytics.com", "https://*.google-analytics.com",
           "https://*.analytics.google.com", "https://pagead2.googlesyndication.com",
           "https://*.googlesyndication.com", "https://*.g.doubleclick.net", "https://*.google.com",
-          "https://ep1.adtrafficquality.google", "https://ep2.adtrafficquality.google"
+          "https://ep1.adtrafficquality.google", "https://ep2.adtrafficquality.google",
+          "https://www.googletagmanager.com"
+
         ],
         frameSrc: [
           "'self'", "https://*.doubleclick.net", "https://*.google.com",

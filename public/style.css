@@ -48,7 +48,8 @@ body {
     text-align: center;
     padding: 20px 0;
     border-bottom: 1px solid #e0e0e0;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    flex-shrink: 0;
 }
 
 .app-header h1 {
@@ -63,6 +64,12 @@ body {
     color: #b0b0b0;
     text-align: center;
     display: block;
+}
+
+#site-logo {
+    max-height: 50px; /* Adjust this value to make your logo bigger or smaller */
+    width: auto;      /* Maintain aspect ratio */
+    vertical-align: middle; /* Helps with alignment */
 }
 
 /* Content Wrapper & Cards */
@@ -410,7 +417,7 @@ textarea#textContent:focus {
         margin-top: 8px;
     }
     .btn {
-        font-size: 0.95rem;
+        font-size: 1.2em;
         padding: 8px 10px;
         min-width: 0;
         width: 100%;
@@ -421,11 +428,11 @@ textarea#textContent:focus {
         padding: 10px;
         min-height: 180px;
     }
-    #view-area .note-content-box {
+    /* #view-area .note-content-box {
         min-height: 200px;
         font-size: 1.05rem;
         padding: 10px;
-    }
+    } */
     .content-size-display {
         font-size: 0.85rem;
         padding: 3px 6px;
@@ -664,3 +671,4 @@ a:hover {
     font-size: 0.95rem;
     border-radius: 6px;
 }
+
