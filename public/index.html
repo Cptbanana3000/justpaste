@@ -56,8 +56,7 @@
             </p>
         </header>
 
-        <!-- AdSense Top Banner Placeholder (if you use it) -->
-        <!-- <div class="ad-banner ad-banner-top"><p>Top Ad Banner Area</p></div> -->
+       
 
 
 
@@ -111,14 +110,14 @@
                 <div class="info-item">
                     <strong>View Link:</strong>
                     <div class="link-container">
-                        <a id="viewLink" href="#" target="_blank"></a> <!-- Target _blank for external-like behavior -->
+                        <a id="viewLink" href="#" target="_blank"></a>  
                         <button class="btn-copy" data-clipboard-target="#viewLink" title="Copy View Link">📋</button>
                     </div>
                 </div>
                 <div class="info-item">
                     <strong>Edit Link:</strong>
                     <div class="link-container">
-                        <a id="editLink" href="#"></a> <!-- This will be handled by SPA router -->
+                        <a id="editLink" href="#"></a>  
                         <button class="btn-copy" data-clipboard-target="#editLink" title="Copy Edit Link">📋</button>
                     </div>
                 </div>
@@ -160,13 +159,12 @@
             <div id="error-message" class="error-text alert alert-danger" style="display: none;"></div>
         </div>
         
-        <!-- AdSense Bottom Banner Placeholder (if you use it) -->
-        <!-- <div class="ad-banner ad-banner-bottom"><p>Bottom Ad Banner Area</p></div> -->
+         
 
         <footer class="app-footer">
             <div class="copyright-text">&copy; <span id="currentYear"></span> Flingnote. All rights reserved.</div>
             <div class="footer-links">
-                <a href="/terms.html">Terms of Service</a> <!-- Use absolute paths for static pages -->
+                <a href="/terms.html">Terms of Service</a>  
                 <a href="/privacy.html">Privacy Policy</a>
                 <a href="/dmca.html">DMCA</a>
                 <a href="/acceptable-use.html">Acceptable Use Policy</a>
@@ -176,7 +174,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="script.js"></script> <!-- This will now resolve from the base href -->
+    <script src="script.js"></script>  
     
     <script>
         document.getElementById('currentYear').textContent = new Date().getFullYear();
@@ -203,8 +201,7 @@
             });
         });
 
-        // Rate limit alert hide function (if you keep the inline onclick)
-        // It's better to move this to script.js and use event listeners
+        
         function hideRateLimitAlert() {
             const alert = document.getElementById('rateLimitAlert');
             if (alert) {
@@ -212,14 +209,13 @@
                 setTimeout(() => { alert.style.display = 'none'; }, 300);
             }
         }
-        // Attach event listener for rate limit close button properly
+         
         const rateLimitCloseButton = document.querySelector('#rateLimitAlert .close-button');
         if (rateLimitCloseButton) {
             rateLimitCloseButton.addEventListener('click', hideRateLimitAlert);
         }
 
-        // Note: The navigateTo function will be defined in the main script.js
-        // The event listeners for createNewFromInfoButton, etc., will be set up in script.js
+        
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const textContent = document.getElementById('textContent');
     const saveButton = document.getElementById('saveButton');
     const updateButton = document.getElementById('updateButton');
-    const newNoteButton = document.getElementById('newNoteButton'); // In editor card
+    const newNoteButton = document.getElementById('newNoteButton'); //  
     const createNewNoteFromViewButton = document.getElementById('createNewNoteFromViewButton');
     const editThisNoteButton = document.getElementById('editThisNoteButton');
     const createNewFromInfoButton = document.getElementById('createNewFromInfoButton');
@@ -22,9 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageDisplay = document.getElementById('message');
     const viewLinkDisplay = document.getElementById('viewLink');
     const editLinkDisplay = document.getElementById('editLink');
-    const editCodeDisplay = document.getElementById('editCodeDisplay'); // In infoArea for edit code
-    const accessCodeDisplay = document.getElementById('accessCodeDisplay'); // In infoArea for access code
-    const editCodeInput = document.getElementById('editCodeInput'); // In editorArea for entering edit code
+    const editCodeDisplay = document.getElementById('editCodeDisplay');  
+    const accessCodeDisplay = document.getElementById('accessCodeDisplay');  
+    const editCodeInput = document.getElementById('editCodeInput');  
     const editCodeSection = document.getElementById('edit-code-section');
 
     const noteContentDisplay = document.getElementById('noteContentDisplay');
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editorPreview = document.getElementById('editorPreview');
     const tabButtons = document.querySelectorAll('.tab-button');
 
-    // Configure marked.js
+    // marked.js
     marked.setOptions({
         highlight: function(code, lang) {
             if (lang && hljs.getLanguage(lang)) {
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Path-based URLs
         const viewUrl = new URL(`/${data.shortId}`, window.location.origin).href;
-        const editUrl = new URL(`/${data.shortId}/edit`, window.location.origin).href;
+        const editUrl = new URL(`/${data.shortId}/edit#${data.editCode}`, window.location.origin).href;
 
         viewLinkDisplay.href = viewUrl; 
         viewLinkDisplay.textContent = viewUrl; 
@@ -246,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(newNoteButton) newNoteButton.style.display = 'inline-block';
         editCodeSection.style.display = 'block';
         editCodeInput.value = currentEditCode || ''; 
-        textContent.disabled = false;
+        // textContent.disabled = false;
         updateSizeDisplay();
         
         // Reset to Write tab
@@ -267,6 +267,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!shortId || !shortId.trim()) {
             showError("Access code/ID is missing or invalid.");
             navigateTo('/'); return;
+        }
+
+        if (forEditing && window.location.hash) {
+            // The fragment will be like '#SECRET_EDIT_CODE'. We remove the '#'
+            const potentialEditCode = window.location.hash.substring(1);
+            if (potentialEditCode) {
+                console.log("Edit code found in URL fragment.");
+                currentEditCode = potentialEditCode;
+            }
         }
         showLoadingState(true);
         try {
