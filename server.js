@@ -112,8 +112,10 @@ app.use(
           "https://*.analytics.google.com", "https://pagead2.googlesyndication.com",
           "https://*.googlesyndication.com", "https://*.g.doubleclick.net", "https://*.google.com",
           "https://ep1.adtrafficquality.google", "https://ep2.adtrafficquality.google",
-          "https://www.googletagmanager.com"
-
+          "https://www.googletagmanager.com",
+          "https://tinylaun.ch",
+          "https://www.tinylaun.ch",
+          "https://tinylaun.ch/tinylaunch_badge_launching_soon.svg"
         ],
         frameSrc: [
           "'self'", "https://*.doubleclick.net", "https://*.google.com",
