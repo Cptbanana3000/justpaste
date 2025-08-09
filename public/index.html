@@ -22,10 +22,12 @@
     <meta property="og:description" content="Flingnote lets you quickly save and share plain text notes, code, and snippets. No sign-up required. Fast, simple, and privacy-friendly.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://flingnote.click/">
+    <meta property="og:image" content="https://flingnote.click/assets/logo.png">
     
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Flingnote - Quickly Save & Share Text Snippets">
     <meta name="twitter:description" content="Flingnote lets you quickly save and share plain text notes, code, and snippets. No sign-up required. Fast, simple, and privacy-friendly.">
+    <meta name="twitter:image" content="https://flingnote.click/assets/logo.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
@@ -35,8 +37,31 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
     <link rel="manifest" href="/assets/site.webmanifest">
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2387807071256876"
-     crossorigin="anonymous"></script>
+    
+        <!-- Structured Data -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Flingnote",
+            "url": "https://flingnote.click/",
+            "description": "Quickly save and share plain text notes, code, and snippets. No sign-up required.",
+            "publisher": {
+                "@type": "Organization",
+                "name": "Flingnote",
+                "url": "https://flingnote.click/",
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://flingnote.click/assets/logo.png"
+                },
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "contactType": "customer support",
+                    "email": "flingnote@proton.me"
+                }
+            }
+        }
+        </script>
 </head>
 <body>
     <div class="main-container">
@@ -163,6 +188,34 @@
                 <p>Loading...</p>
             </div>
             <div id="error-message" class="error-text alert alert-danger" style="display: none;"></div>
+            
+            <!-- SEO-friendly descriptive content -->
+            <section class="card" aria-labelledby="about-flingnote">
+                <h2 id="about-flingnote">What is Flingnote?</h2>
+                <p>Flingnote is a fast, privacy-friendly way to save and share plain text. Paste notes, code snippets, or checklists, then share a simple link. No sign-up, no downloads, and no hassle.</p>
+                <div class="features-grid">
+                    <div>
+                        <h3>Features</h3>
+                        <ul>
+                            <li>Markdown support with live preview</li>
+                            <li>One-click share links and secret edit codes</li>
+                            <li>Syntax highlighting for code</li>
+                            <li>Lightweight: text-only, up to 20KB per note</li>
+                            <li>No accounts; minimal data collection</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Common Uses</h3>
+                        <ul>
+                            <li>Share a quick idea or checklist</li>
+                            <li>Send code snippets with formatting</li>
+                            <li>Post small readme-style notes or docs</li>
+                            <li>Draft short announcements or instructions</li>
+                        </ul>
+                    </div>
+                </div>
+                <p>New here? Read the <a href="/about.html">About</a> page or check the <a href="/faq.html">FAQ</a> to learn more about limits, privacy, and how links work.</p>
+            </section>
         </div>
         
          
@@ -170,6 +223,9 @@
         <footer class="app-footer">
             <div class="copyright-text">&copy; <span id="currentYear"></span> Flingnote. All rights reserved.</div>
             <div class="footer-links">
+                <a href="/about.html">About</a>
+                <a href="/faq.html">FAQ</a>
+                <a href="/contact.html">Contact</a>
                 <a href="/terms.html">Terms of Service</a>  
                 <a href="/privacy.html">Privacy Policy</a>
                 <a href="/dmca.html">DMCA</a>
