@@ -155,6 +155,24 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
+// --- Explicit routes for SEO/AdSense assets ---
+app.get('/ads.txt', (req, res) => {
+  res.type('text/plain');
+  res.sendFile(path.join(__dirname, 'public', 'ads.txt'));
+});
+app.get('/.well-known/ads.txt', (req, res) => {
+  res.type('text/plain');
+  res.sendFile(path.join(__dirname, 'public', 'ads.txt'));
+});
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.sendFile(path.join(__dirname, 'public', 'robots.txt'));
+});
+app.get('/sitemap.xml', (req, res) => {
+  res.type('application/xml');
+  res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
+});
+
 // Helper function to generate a random 6-character alphanumeric shortId
 function generateShortId(length = 6) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
