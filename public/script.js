@@ -280,7 +280,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoadingState(true);
         try {
             const response = await fetch(`${API_BASE_URL_ROOT}/api/notes/s/${shortId.trim()}`);
-            const data = await response.json();
+            let data = {};
+            try { data = await response.json(); } catch(_) { data = { message: await response.text().catch(()=> 'Server error') }; }
             if (!response.ok) throw new Error(data.message || `Note not found or server error.`);
             
             currentNoteId = data.id;
@@ -296,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error fetching note by shortId:', error);
             showError(error.message); // Show specific error from API if available
-            navigateTo('/');
+            // Do not redirect to home; keep user on current route to retry or correct code
         } finally {
             showLoadingState(false);
         }
@@ -317,7 +318,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${API_BASE_URL_ROOT}/api/notes`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content }),
             });
-            const data = await response.json(); // Expects: id, shortId, editCode, message, viewCount (optional)
+            let data = {};
+            try { data = await response.json(); } catch(_) { data = { message: await response.text().catch(()=> 'Server error') }; }
             if (!response.ok) {
                  if (response.status === 413 || response.status === 429) {
                     showRateLimitAlertMessage(data.message); // Use specific rate limit alert
@@ -367,7 +369,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${API_BASE_URL_ROOT}/api/notes/${currentNoteId}`, {
                 method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content, editCode }),
             });
-            const data = await response.json();
+            let data = {};
+            try { data = await response.json(); } catch(_) { data = { message: await response.text().catch(()=> 'Server error') }; }
             if (!response.ok) {
                 if (response.status === 413 || response.status === 429) {
                     showRateLimitAlertMessage(data.message);

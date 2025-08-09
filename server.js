@@ -45,29 +45,29 @@ const validateContentSize = (req, res, next) => {
 // --- Rate Limiting Configuration ---
 // General API limiter
 const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 50, // Reduced from 100 to 50 requests per windowMs
-    message: 'Too many requests from this IP, please try again after 15 minutes',
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // Allow more general API reads
+  message: { message: 'Too many requests from this IP, please try again after 15 minutes' },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
 // Stricter limiter for note creation
 const createNoteLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 5, // Reduced from 10 to 5 note creations per hour
-    message: 'Too many notes created from this IP, please try again after an hour',
-    standardHeaders: true,
-    legacyHeaders: false,
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 30, // Allow more note creations per hour
+  message: { message: 'Too many notes created from this IP, please try again after an hour' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // Stricter limiter for note updates
 const updateNoteLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10, // Reduced from 20 to 10 updates per 15 minutes
-    message: 'Too many note updates from this IP, please try again after 15 minutes',
-    standardHeaders: true,
-    legacyHeaders: false,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // Allow more updates
+  message: { message: 'Too many note updates from this IP, please try again after 15 minutes' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // --- Firebase Admin SDK Initialization ---
