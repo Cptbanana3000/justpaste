@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editCodeSection = document.getElementById('edit-code-section');
 
     const noteContentDisplay = document.getElementById('noteContentDisplay');
+    const adContainer = document.getElementById('ad-container');
     const initialViewCountDisplay = document.getElementById('initialViewCountDisplay');
     const noteViewCountDisplay = document.getElementById('noteViewCountDisplay');
     const noteTimestampDisplay = document.getElementById('noteTimestamp');
@@ -171,7 +172,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function showEditorView() {
         setActiveView(editorArea);
         if (codeAccessRow) codeAccessRow.style.display = 'flex';
-        showAds(false);
+    showAds(false);
+    teardownAds();
         textContent.value = '';
         editCodeInput.value = '';
         textContent.disabled = false;
@@ -187,7 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showInfoView(data) { // data: { id, shortId, editCode, message, viewCount }
         setActiveView(infoArea);
-        showAds(false);
+    showAds(false);
+    teardownAds();
         messageDisplay.textContent = data.message || 'Note saved successfully!';
         
         // Path-based URLs
@@ -215,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showNoteView(noteData) {
         setActiveView(viewArea);
-        showAds(true);
+    showAds(false); // We control ads via manual placement, not banner toggles
         
         // Parse and render the Markdown content
         noteContentDisplay.innerHTML = marked.parse(noteData.content || '');
@@ -232,13 +235,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if(noteViewCountDisplay) noteViewCountDisplay.textContent = noteData.views !== undefined ? noteData.views : 'N/A';
         
-        currentNoteId = noteData.id;
-        currentShortId = noteData.shortId;
+    currentNoteId = noteData.id;
+    currentShortId = noteData.shortId;
+
+    // Only load ads on substantial content pages
+    maybeLoadAdsForNote(noteData);
     }
 
     function showEditView(noteContent) {
         setActiveView(editorArea);
-        showAds(false);
+    showAds(false);
+    teardownAds();
         if (codeAccessRow) codeAccessRow.style.display = 'none';
         textContent.value = noteContent;
         saveButton.style.display = 'none';
@@ -467,6 +474,69 @@ document.addEventListener('DOMContentLoaded', () => {
     function navigateTo(path) {
         history.pushState({ path: path }, '', path);
         router();
+    }
+
+    // --- AdSense manual gating ---
+    function getWordCountFromHtml(html) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        const text = tmp.textContent || tmp.innerText || '';
+        return (text.trim().match(/\S+/g) || []).length;
+    }
+
+    function ensureAdSenseScriptLoaded() {
+        if (window.adsbygoogle) return true; // likely already present
+        const existing = document.querySelector('script[data-adsbygoogle]');
+        if (existing) return true;
+        const s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2387807071256876';
+        s.setAttribute('crossorigin', 'anonymous');
+        s.setAttribute('data-adsbygoogle', '1');
+        document.head.appendChild(s);
+        return false; // not yet loaded
+    }
+
+    function teardownAds() {
+        if (!adContainer) return;
+        adContainer.style.display = 'none';
+        adContainer.innerHTML = '';
+    }
+
+    function maybeLoadAdsForNote(noteData) {
+        if (!adContainer) return;
+        const wordCount = getWordCountFromHtml(noteContentDisplay.innerHTML);
+        const isEligible = wordCount >= 250; // threshold to avoid "no publisher content" violations
+        if (!isEligible) { teardownAds(); return; }
+
+        // Prepare container
+        adContainer.style.display = 'block';
+        adContainer.innerHTML = '';
+
+        // Ensure AdSense script is present
+        const ready = ensureAdSenseScriptLoaded();
+
+        // Create an ad unit
+        const ins = document.createElement('ins');
+        ins.className = 'adsbygoogle';
+        ins.style.display = 'block';
+        // Replace with your responsive ad unit slot if you have one; fallback to auto format
+        ins.setAttribute('data-ad-client', 'ca-pub-2387807071256876');
+        ins.setAttribute('data-ad-slot', 'auto');
+        ins.setAttribute('data-ad-format', 'auto');
+        ins.setAttribute('data-full-width-responsive', 'true');
+        adContainer.appendChild(ins);
+
+        function pushAd() {
+            try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) { /* no-op */ }
+        }
+
+        if (ready) {
+            pushAd();
+        } else {
+            // If script just injected, wait a bit then push
+            setTimeout(pushAd, 800);
+        }
     }
     
     // --- Event Listeners ---

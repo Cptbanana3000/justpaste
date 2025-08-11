@@ -858,4 +858,11 @@ a:hover {
     margin: 1em 0;
 }
 
+/* Ad container: only appears on eligible content pages */
+.ad-container {
+    margin-top: 16px;
+    padding-top: 8px;
+    border-top: 1px solid #333;
+}
+
 
