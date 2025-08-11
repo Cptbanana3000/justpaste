@@ -20,30 +20,127 @@
       <div class="content-wrapper">
         <div class="card">
           <p>
-            Consistency makes notes easier to read and maintain. Adopt a few
-            simple rules and stick to them.
+            Consistency is the hallmark of professional and readable
+            documentation. When you're writing notes, especially ones that will
+            be shared with others, adopting a simple style guide can make your
+            content significantly easier to read, understand, and maintain. A
+            style guide isn't about rigid, restrictive rules; it's about making
+            conscious choices to create a consistent experience for your
+            readers. By adopting a few simple standards, you can ensure your
+            Markdown notes are always clear and effective.
           </p>
-          <h2>Headings</h2>
+
+          <h2>Why a Style Guide Matters</h2>
           <p>
-            Use # for the title, then start sections at ##. Avoid skipping
-            levels.
+            A consistent style reduces cognitive load on the reader. When
+            headings, lists, and code blocks always look and feel the same, the
+            reader can focus on the content itself, not on deciphering the
+            structure. This is especially critical in technical documentation or
+            collaborative notes where clarity is paramount.
           </p>
-          <h2>Lists</h2>
+
+          <h2>Headings: The Backbone of Your Document</h2>
           <p>
-            Use dashes for unordered lists and numbers for steps. Keep items
-            parallel in structure.
+            Headings provide the primary structure for your note. Using them
+            correctly is crucial for readability and accessibility.
           </p>
-          <h2>Code</h2>
+          <ul>
+            <li>
+              <strong>Use a Single H1:</strong> A document should only have one
+              main title, created with a single hash (`#`). This should be the
+              very first thing in your note.
+            </li>
+            <li>
+              <strong>Start Sections with H2:</strong> All major sections of your
+              document should begin with a level-two heading (`##`).
+            </li>
+            <li>
+              <strong>Don't Skip Levels:</strong> Maintain a logical hierarchy.
+              Never jump from an `H2` directly to an `H4`. If you need a
+              sub-section within an `H2`, use an `H3` (`###`). This is vital for
+              screen readers and automated document parsers.
+            </li>
+          </ul>
+
+          <h2>Lists: For Clarity and Scannability</h2>
           <p>
-            Include language tags and keep lines under ~80 characters when
-            possible.
+            Lists are perfect for breaking down complex information into
+            digestible points.
           </p>
-          <h2>Links</h2>
+          <ul>
+            <li>
+              <strong>Choose One Bullet Style:</strong> For unordered lists,
+              Markdown allows you to use dashes (`-`), asterisks (`*`), or plus
+              signs (`+`). Pick one (dashes are a common and clean choice) and
+              stick with it throughout your document for a consistent look.
+            </li>
+            <li>
+              <strong>Use Ordered Lists for Steps:</strong> If the order of items
+              matters, such as in a tutorial or a checklist of sequential tasks,
+              always use a numbered list.
+            </li>
+            <li>
+              <strong>Keep List Items Parallel:</strong> Try to start each item in a
+              list with the same part of speech (e.g., all verbs) and keep the
+              phrasing consistent. This makes the list much easier to scan.
+            </li>
+          </ul>
+
+          <h2>Code: For Readability and Safety</h2>
           <p>
-            Use descriptive text, not bare URLs, and place references at the end
-            if needed.
+            Properly formatted code is essential in any technical note.
           </p>
-          <p>Small standards pay big dividends over time.</p>
+          <ul>
+            <li>
+              <strong>Use Inline Code for Identifiers:</strong> Use single
+              backticks (<code>`</code>) to wrap variable names, function names,
+              filenames (`script.js`), and terminal commands (`npm install`).
+              This visually separates them from the surrounding text.
+            </li>
+            <li>
+              <strong>Always Add Language Tags:</strong> As mentioned in our other
+              guides, always add a language identifier to your fenced code
+              blocks (e.g., <code>```python</code>) to enable syntax
+              highlighting.
+            </li>
+            <li>
+              <strong>Keep Lines to a Reasonable Length:</strong> For readability,
+              try to keep lines of code under 80 characters. While not a strict
+              rule, it prevents horizontal scrolling, which is particularly
+              disruptive on mobile devices.
+            </li>
+          </ul>
+
+          <h2>Links: For Context and Trust</h2>
+          <p>
+            Links should be clear and descriptive, never ambiguous.
+          </p>
+          <ul>
+            <li>
+              <strong>Use Descriptive Text:</strong> The link's text should
+              describe its destination. Avoid generic phrases like "click
+              here." Instead of `Click here for the docs`, use `Read the
+              [official documentation](...)`.
+            </li>
+            <li>
+              <strong>Consider Reference-Style Links:</strong> For notes with many
+              links, you can use reference-style links to keep the main body of
+              text clean. This involves defining the URL at the bottom of your
+              document.
+            </li>
+          </ul>
+          <pre><code>This is a link to [the Flingnote blog][1].
+
+[1]: [https://flingnote.click/blog/](https://flingnote.click/blog/)</code></pre>
+
+          <h2>Conclusion: Small Standards, Big Dividends</h2>
+          <p>
+            You don't need a hundred-page manual to write better Markdown. By
+            adopting just a few of these simple rules, you can dramatically
+            improve the quality and consistency of your notes. These small
+            standards pay big dividends over time, making your content more
+            valuable for both your future self and anyone you share it with.
+          </p>
           <p><a href="/blog/">Back to Blog</a></p>
         </div>
       </div>

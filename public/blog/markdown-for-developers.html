@@ -22,32 +22,117 @@
       <div class="content-wrapper">
         <div class="card">
           <p>
-            Markdown is ideal for code-focused notes. These tips keep your
-            snippets readable and useful.
+            For developers, Markdown is more than just a formatting syntax; it's
+            an essential tool for communication. Whether you're writing
+            documentation, commenting on a pull request, or sharing a quick
+            code snippet in a tool like Flingnote, well-structured Markdown can
+            make your technical explanations clearer and more effective. These
+            developer-focused tips will help you keep your code-centric notes
+            readable, useful, and professional.
           </p>
-          <h2>Language Tags</h2>
+
+          <h2>Why Markdown is a Developer's Best Friend</h2>
           <p>
-            Always add the language to fenced blocks for reliable syntax
-            highlighting.
+            Before we dive into the tips, it's worth noting why Markdown has
+            become the de facto standard for technical documentation. It's
+            text-based, which means it's version-controllable. It's simple, so
+            it doesn't get in the way of the code. And most importantly, it has
+            excellent support for displaying code, which is critical for any
+            developer-focused communication.
           </p>
-          <h2>Context and Examples</h2>
+
+          <h2>1. Always Use Language Tags in Code Blocks</h2>
           <p>
-            Add a short paragraph explaining what the function does and include
-            a sample call.
+            This is the most important rule for sharing code. Always specify the
+            programming language after the opening triple backticks. This
+            enables syntax highlighting, which dramatically improves
+            readability by adding color to keywords, variables, and comments.
+            It transforms a monotonous block of text into a structured, easy-to-scan
+            snippet.
           </p>
-          <h2>Break Up Long Snippets</h2>
+          <p><strong>Without language tag:</strong></p>
+          <pre><code>```
+function factorial(n) {
+  if (n === 0) {
+    return 1;
+  }
+  return n * factorial(n - 1);
+}
+```</code></pre>
+          <p><strong>With language tag:</strong></p>
+          <pre><code>```javascript
+function factorial(n) {
+  if (n === 0) {
+    return 1;
+  }
+  return n * factorial(n - 1);
+}
+```</code></pre>
           <p>
-            Prefer multiple smaller blocks with headings instead of one giant
-            chunk.
+            The second example is far easier to read and understand at a
+            glance.
           </p>
-          <h2>Escape Carefully</h2>
+
+          <h2>2. Provide Context and Clear Examples</h2>
           <p>
-            When showing Markdown or HTML, escape characters to avoid unintended
-            formatting.
+            Code rarely exists in a vacuum. A snippet shared without context
+            forces the reader to guess its purpose. Always add a short
+            paragraph explaining what the function does, what its parameters
+            are, and what it returns. Follow up with a simple example of how to
+            call the function.
           </p>
+          <pre><code>This function calculates the area of a circle given its radius.
+
+```javascript
+function calculateCircleArea(radius) {
+  return Math.PI * radius * radius;
+}
+
+// Example usage:
+const area = calculateCircleArea(10); // returns 314.159...
+```</code></pre>
+
+          <h2>3. Break Up Long Snippets into Logical Chunks</h2>
           <p>
-            With a little structure, your code notes become miniature
-            documentation.
+            Resist the urge to paste an entire file into a single code block. A
+            giant, scrolling block of code is intimidating and difficult to
+            digest. Instead, break up your code into smaller, logical chunks,
+            using headings and descriptive text to guide the reader through it.
+            This turns a code dump into a narrative that's much easier to
+            follow.
+          </p>
+
+          <h2>4. Escape Characters Carefully</h2>
+          <p>
+            Markdown uses characters like `*`, `_`, `[`, and ` ` for its own
+            syntax. When you need to display these characters literally—for
+            example, when writing about Markdown itself or showing HTML—you must
+            "escape" them with a backslash (`\`).
+          </p>
+          <pre><code>To make text bold, you surround it with two asterisks, like this: \*\*bold text\*\*.</code></pre>
+          <p>
+            For larger blocks of HTML or Markdown examples, it's often easier
+            to put them inside a fenced code block to prevent any rendering.
+          </p>
+
+          <h2>5. Use Tables for Structured Data</h2>
+          <p>
+            When you need to explain a set of parameters, configuration
+            options, or API endpoints, a Markdown table is an excellent tool.
+            It presents structured data in a clean, easy-to-scan format.
+          </p>
+          <pre><code>| Parameter | Type   | Description                |
+| :-------- | :----- | :------------------------- |
+| `userId`  | String | The ID of the user.        |
+| `limit`   | Number | The number of items to return. |</code></pre>
+
+          <h2>Conclusion: From Snippet to Documentation</h2>
+          <p>
+            By following these simple practices, you can elevate your shared
+            code from a simple snippet to a piece of miniature documentation.
+            This not only helps your colleagues and collaborators understand
+            your work but also reinforces your own understanding of the code. A
+            little structure and context can make all the difference.
           </p>
           <p><a href="/blog/">Back to Blog</a></p>
         </div>

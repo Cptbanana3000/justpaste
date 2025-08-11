@@ -22,28 +22,122 @@
       <div class="content-wrapper">
         <div class="card">
           <p>
-            Constraints help keep content concise. Here are tricks to stay under
-            the 20KB limit without losing clarity.
+            In a world of unlimited cloud storage, a size limit might seem like
+            a strange restriction. However, Flingnote's 20KB limit per note is a
+            deliberate design choice. Constraints are powerful tools that can
+            foster clarity, focus, and efficiency. By encouraging concise
+            content, this limit ensures that notes are fast to load, easy to
+            read, and respectful of everyone's bandwidth. This guide offers
+            practical tricks and a new mindset for staying under the limit
+            without sacrificing clarity.
           </p>
-          <h2>Techniques</h2>
+
+          <h2>Why a Size Limit is a Feature, Not a Bug</h2>
+          <p>
+            Before diving into techniques, it's important to understand the
+            philosophy behind the constraint:
+          </p>
           <ul>
-            <li>Use headings and bullets over long paragraphs.</li>
-            <li>Link out for large logs or datasets.</li>
-            <li>Prefer code snippets over full files.</li>
+            <li>
+              <strong>Speed:</strong> Small notes load instantly, even on slow
+              mobile connections. This is crucial for a tool designed for quick,
+              in-the-moment sharing.
+            </li>
+            <li>
+              <strong>Focus:</strong> A size limit forces you to be disciplined.
+              It encourages you to get to the point, trim unnecessary words, and
+              share only what is essential.
+            </li>
+            <li>
+              <strong>Readability:</strong> A 20KB note is long enough for
+              detailed instructions but short enough to prevent it from becoming
+              an unreadable monolith. This is especially important for mobile
+              viewers.
+            </li>
           </ul>
-          <h2>Format Efficiently</h2>
+
+          <h2>What Actually Consumes Space?</h2>
           <p>
-            Markdown is compact, but embedded images or long code can bloat
-            size. Trim carefully.
+            Not all text is created equal. A single character in plain text
+            typically takes up one byte. This means 20KB is roughly equivalent
+            to 20,480 characters. While Markdown syntax itself is very
+            lightweight, the content you write is what matters most. The biggest
+            culprits for consuming space are:
           </p>
-          <h2>Iterate</h2>
+          <ul>
+            <li>
+              <strong>Long, verbose paragraphs</strong> with unnecessary words.
+            </li>
+            <li>
+              <strong>Large code blocks or log file dumps</strong> that could be
+              summarized or linked to.
+            </li>
+            <li>
+              <strong>Base64-encoded data or other text representations of binary
+              files.</strong>
+            </li>
+          </ul>
+
+          <h2>Techniques for Staying Under the Limit</h2>
           <p>
-            Save the essentials. If the note grows, split it into parts with
-            clear links.
+            Here are several practical strategies to keep your notes lean and
+            effective.
+          </p>
+
+          <h3>1. Write Concisely and Use Structure</h3>
+          <p>
+            Instead of writing long, narrative paragraphs, break your ideas
+            down. Use headings to create a clear hierarchy and bullet points to
+            list key information. This not only saves space but also makes your
+            note far more scannable and easier for readers to digest.
+          </p>
+
+          <h3>2. Link, Don't Paste (for Large Content)</h3>
+          <p>
+            If you need to reference a large log file, a lengthy academic
+            paper, or a massive block of JSON, do not paste the entire thing
+            into your note. Instead, upload that content to a dedicated service
+            (or another Flingnote!) and simply link to it. Summarize the key
+            takeaway in your main note.
+          </p>
+          <p><strong>Before (consumes a lot of space):</strong></p>
+          <pre><code>## API Error Log
+... (500 lines of log text pasted here) ...</code></pre>
+          <p><strong>After (efficient and clear):</strong></p>
+          <pre><code>## API Error Log
+We encountered a recurring `502 Bad Gateway` error. The full log file can be
+found [here](link-to-another-note-with-the-log). The key error message appears
+to be `upstream connect error or disconnect/reset before headers`.</code></pre>
+
+          <h3>3. Share Only the Essential Code</h3>
+          <p>
+            When sharing code to ask a question or demonstrate a solution, you
+            rarely need to share the entire file or application. Isolate the
+            specific function, class, or component that is relevant. A minimal,
+            reproducible example is not only smaller in size but also much more
+            helpful to the person reading it.
+          </p>
+
+          <h2>Advanced Strategy: Split and Iterate</h2>
+          <p>
+            What if your note naturally grows beyond the 20KB limit? This is a
+            sign that your single note might be trying to do too much. This is a
+            perfect opportunity to refactor your content.
           </p>
           <p>
-            Small notes are easier to read, faster to load, and kinder to
-            bandwidth.
+            Split the note into multiple, smaller notes and use the linking
+            strategies discussed in our other articles. You could create a main
+            "hub" note that links out to several more detailed "spoke" notes.
+            This approach turns a single, oversized document into a small,
+            organized wiki that is much easier to navigate and maintain.
+          </p>
+
+          <h2>Conclusion: Better Notes Through Constraints</h2>
+          <p>
+            Working within a size limit encourages better writing habits. It
+            pushes you to be clear, concise, and focused on your reader's needs.
+            By embracing this constraint, you'll find that your notes become not
+            only more efficient but also more effective.
           </p>
           <p><a href="/blog/">Back to Blog</a></p>
         </div>

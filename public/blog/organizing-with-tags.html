@@ -22,29 +22,104 @@
       <div class="content-wrapper">
         <div class="card">
           <p>
-            Even without accounts or built-in tags, you can add structure to
-            your notes. Here are minimal systems that still work.
+            One of the biggest challenges of using a minimalist, account-free
+            note-taking system is organization. Without the built-in folders,
+            tags, and search capabilities of larger applications, how do you
+            prevent your notes from becoming a scattered, disconnected mess? The
+            answer lies in adopting simple, text-based conventions that add
+            structure and discoverability to your content. Here are several
+            lightweight systems that work surprisingly well, allowing you to
+            organize your notes without sacrificing speed or simplicity.
           </p>
-          <h2>Inline Tags</h2>
+
+          <h2>The Philosophy: Structure Should Not Be a Burden</h2>
           <p>
-            Add tags at the end of your note using a tag line like:
-            <code>Tags: howto, cli, linux</code>.
+            The key to successful organization in a minimalist system is to
+            ensure that the act of organizing never becomes more work than the
+            note-taking itself. The methods below are designed to be lightweight
+            and incremental. You can apply them as needed, without feeling pressured
+            to build a complex system from day one.
           </p>
-          <h2>Section Tags</h2>
+
+          <h2>1. Inline Tags: Simple and Direct</h2>
           <p>
-            Use a section header like <code>## Tags</code> and list categories
-            you care about.
+            This is the most straightforward method. At the very bottom of your
+            note, simply add a line prefixed with "Tags:" and list relevant
+            keywords. This makes it easy to search for all notes related to a
+            topic using your computer's built-in file search or a command-line
+            tool like `grep`.
           </p>
-          <h2>Hashtags</h2>
+          <pre><code>... (content of your note) ...
+
+---
+Tags: productivity, howto, cli, linux</code></pre>
           <p>
-            Include simple hashtags in-context to improve searchability in chat
-            apps and docs.
+            This approach is simple, unobtrusive, and requires zero setup.
           </p>
-          <h2>Link Hubs</h2>
+
+          <h2>2. Section-Based Tags</h2>
           <p>
-            Maintain an index note that lists notes under headings by theme.
+            A slightly more structured version of inline tags is to create a
+            dedicated "Tags" or "Metadata" section in your note, typically at
+            the end. This is useful if you want to include more than just tags,
+            such as a creation date or a status.
           </p>
-          <p>Keep it simple—structure should never slow you down.</p>
+          <pre><code>... (content of your note) ...
+
+## Metadata
+- **Status:** Draft
+- **Created:** 2023-10-27
+- **Tags:** javascript, api, tutorial</code></pre>
+
+          <h2>3. Contextual Hashtags for Discoverability</h2>
+          <p>
+            Hashtags (`#topic`) are a powerful way to add context directly
+            within your sentences. While Flingnote itself doesn't have a hashtag
+            system, these tags become incredibly useful when you share your
+            notes or copy them into other systems like Slack, Twitter, or a
+            personal wiki that *do* support hashtag-based search.
+          </p>
+          <p>
+            Using hashtags within your text makes your notes instantly more
+            discoverable in the broader digital ecosystem where they are likely
+            to be shared.
+          </p>
+          <pre><code>Today's meeting on the #Q4-roadmap focused on our new #API-strategy.</code></pre>
+
+          <h2>4. The Index Note (or "Link Hub")</h2>
+          <p>
+            This is arguably the most powerful strategy for building a true
+            knowledge base. It's the manual equivalent of a folder or a tag
+            index. You create a central "Index" or "Hub" note that serves as a
+            master table of contents for a specific project or topic.
+          </p>
+          <p>
+            Whenever you create a new note related to that topic, you simply add
+            a link to it in your Index note, along with a short description.
+            Over time, this Index becomes a curated, easy-to-navigate portal to
+            all your related content.
+          </p>
+          <p><strong>Example Index Note (`My Project Hub`):</strong></p>
+          <pre><code># My Project Hub
+
+## Key Documents
+- [Project Goals](link-to-goals-note)
+- [Technical Plan](link-to-plan-note)
+
+## Meeting Notes
+- [2023-10-26 Kick-off Meeting](link-to-meeting1-note)
+- [2023-10-27 API Design Session](link-to-meeting2-note)</code></pre>
+
+          <h2>Conclusion: Keep It Simple, Let It Evolve</h2>
+          <p>
+            You don't need a complex system from the start. Begin with simple
+            inline tags. As your collection of notes grows, you might create an
+            Index note for your most important project. The best system is the
+            one you'll actually use, and these lightweight methods are designed
+            to be so simple that they never get in your way. By adding just a
+            little bit of intentional structure, you can turn a collection of
+            simple notes into a powerful, interconnected web of knowledge.
+          </p>
           <p><a href="/blog/">Back to Blog</a></p>
         </div>
       </div>

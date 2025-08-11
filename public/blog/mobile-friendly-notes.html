@@ -22,19 +22,114 @@
       <div class="content-wrapper">
         <div class="card">
           <p>
-            Most readers will open your notes on mobile. Here’s how to keep
-            content readable on small screens.
+            It's a simple fact of the modern web: the majority of your readers
+            will open your notes on a mobile device. A note that looks perfectly
+            structured on a wide desktop monitor can quickly become an
+            unreadable "wall of text" on a small phone screen. To ensure your
+            message gets across effectively, you need to adopt a mobile-first
+            mindset when writing. Here are some simple but powerful techniques
+            to keep your content readable, scannable, and engaging on any
+            screen size.
           </p>
-          <h2>Concise Sections</h2>
+
+          <h2>1. Embrace Brevity: Write Concise Sections</h2>
           <p>
-            Use short paragraphs and lists. Avoid long code blocks where
-            possible.
+            The single most important rule for mobile readability is to keep
+            your paragraphs short. On a narrow screen, even a moderately sized
+            paragraph can fill the entire viewport, forcing the reader to scroll
+            endlessly. This creates cognitive friction and makes it easy to lose
+            one's place.
           </p>
-          <h2>Meaningful Headings</h2>
-          <p>Headings help readers scan and jump to sections that matter.</p>
-          <h2>Link Out Wisely</h2>
-          <p>Put long references behind links to keep the page tidy.</p>
-          <p>Mobile-first notes improve comprehension and reduce bounce.</p>
+          <ul>
+            <li>
+              <strong>Break It Down:</strong> Aim for paragraphs that are no more
+              than three to four sentences long. If a single idea takes longer
+              to explain, consider breaking it into a bulleted list.
+            </li>
+            <li>
+              <strong>Avoid Long Code Blocks:</strong> A wide block of code is
+              often the biggest offender of mobile layouts, forcing horizontal
+              scrolling. If you must share a large snippet, consider sharing
+              only the most relevant part or linking out to a full version on a
+              platform like GitHub Gist or another Flingnote.
+            </li>
+          </ul>
+
+          <h2>2. Use Meaningful Headings as Signposts</h2>
+          <p>
+            On a desktop, a reader can see the entire structure of your document
+            at a glance. On mobile, they can only see a small portion at a time.
+            This makes headings incredibly important—they act as signposts that
+            allow the reader to scan the document and jump to the sections that
+            are most relevant to them.
+          </p>
+          <p>
+            A well-structured note with clear, descriptive headings is a gift to
+            your mobile reader. It allows them to quickly understand the main
+            points of your note without having to read every single word.
+          </p>
+          <p><strong>Poor Structure (Hard to Scan):</strong></p>
+          <pre><code>My Project Update
+We started the new feature and ran into a bug with the API. The authentication
+token wasn't being passed correctly. We fixed it by updating the header. The
+next step is to work on the UI.</code></pre>
+          <p><strong>Good Structure (Easy to Scan):</strong></p>
+          <pre><code># Project Update
+
+## What We Did
+- Started work on the new user profile feature.
+
+## Blockers
+- Encountered a bug where the API authentication token was not being passed.
+- **Fix:** Updated the request header to include the correct token.
+
+## Next Steps
+- Begin development on the UI components.</code></pre>
+
+          <h2>3. Link Out Wisely to Keep Your Note Tidy</h2>
+          <p>
+            Your note doesn't have to contain every single piece of
+            information. Use links to "outsource" dense or secondary content.
+            This keeps your main note focused, clean, and fast-loading.
+          </p>
+          <ul>
+            <li>
+              <strong>Link to Sources:</strong> Instead of pasting long quotes or
+              articles, summarize the key point and link to the original
+              source.
+            </li>
+            <li>
+              <strong>Link to Data:</strong> Don't paste a massive log file or a
+              huge JSON object. Put it in its own Flingnote and link to it from
+              your main note.
+            </li>
+            <li>
+              <strong>Use Descriptive Links:</strong> As always, ensure your link
+              text describes the destination. This helps the reader decide if
+              they need to tap on the link for more information.
+            </li>
+          </ul>
+
+          <h2>4. Be Careful with Tables</h2>
+          <p>
+            Markdown tables are a great way to display structured data, but they
+            can be problematic on mobile. A table with many columns will almost
+            always break the layout on a narrow screen, forcing horizontal
+            scrolling. If you must use a table, try to keep it to two or three
+            columns at most. For more complex data, it's often better to use a
+            series of lists and headings instead.
+          </p>
+
+          <h2>Conclusion: A Mobile-First Mindset</h2>
+          <p>
+            Creating mobile-friendly notes isn't about learning complex code;
+            it's about empathy for your reader. By writing in short, concise
+            sections, using clear headings as signposts, and linking out to
+            heavier content, you create a reading experience that is pleasant
+            and effective on any device. A mobile-first note is one that
+            respects the reader's time and attention, which ultimately makes
+            your message more impactful.
+          </p>
           <p><a href="/blog/">Back to Blog</a></p>
         </div>
       </div>
