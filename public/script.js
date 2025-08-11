@@ -169,11 +169,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- UI Update Functions ---
+    // --- SEO helpers: robots noindex for user-generated note views ---
+    function setRobotsNoIndex(enable) {
+        let tag = document.querySelector('meta[name="robots"]');
+        if (enable) {
+            if (!tag) {
+                tag = document.createElement('meta');
+                tag.setAttribute('name', 'robots');
+                document.head.appendChild(tag);
+            }
+            tag.setAttribute('content', 'noindex, follow');
+        } else {
+            if (tag) tag.remove();
+        }
+    }
+
     function showEditorView() {
         setActiveView(editorArea);
         if (codeAccessRow) codeAccessRow.style.display = 'flex';
     showAds(false);
     teardownAds();
+        setRobotsNoIndex(false);
         textContent.value = '';
         editCodeInput.value = '';
         textContent.disabled = false;
@@ -191,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setActiveView(infoArea);
     showAds(false);
     teardownAds();
+    setRobotsNoIndex(false);
         messageDisplay.textContent = data.message || 'Note saved successfully!';
         
         // Path-based URLs
@@ -240,12 +257,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Only load ads on substantial content pages
     maybeLoadAdsForNote(noteData);
+
+    // User-generated content should not be indexed
+    setRobotsNoIndex(true);
     }
 
     function showEditView(noteContent) {
         setActiveView(editorArea);
     showAds(false);
     teardownAds();
+    setRobotsNoIndex(false);
         if (codeAccessRow) codeAccessRow.style.display = 'none';
         textContent.value = noteContent;
         saveButton.style.display = 'none';

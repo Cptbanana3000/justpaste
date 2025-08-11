@@ -40,4 +40,29 @@
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
+  <url>
+    <loc>https://flingnote.click/blog/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url><loc>https://flingnote.click/blog/creative-ways-to-use-flingnote.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/beginners-guide-markdown-notes.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/securely-share-code-snippets.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/privacy-in-online-note-taking.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/flingnote-vs-others.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/tutorial-getting-started.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/markdown-checklists.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/sharing-readme-style-notes.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/links-and-previews.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/keyboard-shortcuts.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/collaboration-without-accounts.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/organizing-with-tags.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/note-size-limits.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/markdown-for-developers.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/mobile-friendly-notes.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/writing-clear-notes.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/shareable-how-tos.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/note-linking-strategies.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/markdown-style-guide.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://flingnote.click/blog/share-code-effectively.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
 </urlset>
