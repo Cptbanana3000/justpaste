@@ -292,9 +292,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- API Calls ---
     async function fetchNoteByShortId(shortId, forEditing = false) {
-        if (!shortId || !shortId.trim()) {
+        // Enhanced validation
+        if (!shortId || typeof shortId !== 'string' || !shortId.trim()) {
+            console.warn('fetchNoteByShortId called with invalid shortId:', shortId);
             showError("Access code/ID is missing or invalid.");
-            navigateTo('/'); return;
+            navigateTo('/'); 
+            return;
+        }
+
+        // Sanitize shortId - only allow alphanumeric characters
+        const cleanShortId = shortId.trim();
+        if (!/^[a-zA-Z0-9]+$/.test(cleanShortId)) {
+            console.warn('fetchNoteByShortId called with invalid shortId format:', cleanShortId);
+            showError("Invalid access code format.");
+            navigateTo('/'); 
+            return;
         }
 
         if (forEditing && window.location.hash) {
@@ -307,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         showLoadingState(true);
         try {
-            const response = await fetch(`${API_BASE_URL_ROOT}/api/notes/s/${shortId.trim()}`);
+            const response = await fetch(`${API_BASE_URL_ROOT}/api/notes/s/${cleanShortId}`);
             let data = {};
             try { data = await response.json(); } catch(_) { data = { message: await response.text().catch(()=> 'Server error') }; }
             if (!response.ok) throw new Error(data.message || `Note not found or server error.`);
@@ -458,6 +470,14 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoadingState(true); 
 
         const path = window.location.pathname;
+        
+        // Skip routing for static files and policy pages
+        if (path.includes('.html') || path.includes('.css') || path.includes('.js') || 
+            path.includes('.png') || path.includes('.ico') || path.includes('.txt')) {
+            showLoadingState(false);
+            return;
+        }
+
         let matchedRouteHandler = null;
         let routeParams = {};
 
@@ -474,9 +494,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 const matchResult = path.match(regex);
 
                 if (matchResult) {
-                    paramNames.forEach((name, index) => { routeParams[name] = matchResult[index + 1]; });
-                    matchedRouteHandler = routes[routePattern];
-                    break;
+                    // Validate the matched parameters
+                    let validParams = true;
+                    paramNames.forEach((name, index) => { 
+                        const paramValue = matchResult[index + 1];
+                        // Ensure shortId parameters are alphanumeric
+                        if (name === 'id' && !/^[a-zA-Z0-9]+$/.test(paramValue)) {
+                            validParams = false;
+                        }
+                        routeParams[name] = paramValue; 
+                    });
+                    
+                    if (validParams) {
+                        matchedRouteHandler = routes[routePattern];
+                        break;
+                    }
                 }
             }
         }

@@ -99,6 +99,18 @@ body {
     letter-spacing: -0.025em;
 }
 
+.app-header h1 a {
+    text-decoration: none;
+    border: none;
+    display: inline-block;
+}
+
+.app-header h1 a:hover {
+    text-decoration: none;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
 .app-header .subtitle {
     font-size: 1rem;
     color: var(--gray-400);
@@ -696,17 +708,95 @@ textarea#textContent::placeholder {
 }
 
 /* General styles for policy pages */
-h1 {
-    color: #333;
-    margin-bottom: 20px;
-    text-align: center;
-    font-size: 2rem;
+body {
+    line-height: 1.6;
 }
 
-p {
+/* Policy page container - centered and clean */
+.main-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--black);
+    color: var(--gray-100);
+    min-height: 100vh;
+}
+
+/* Policy page typography */
+.main-container h1 {
+    color: var(--white);
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 600;
+    border-bottom: 2px solid var(--gray-700);
+    padding-bottom: 1rem;
+}
+
+.main-container h2 {
+    color: var(--white);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 1px solid var(--gray-700);
+    padding-bottom: 0.5rem;
+}
+
+.main-container h3 {
+    color: var(--gray-200);
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 1.5rem 0 0.75rem 0;
+}
+
+.main-container p {
+    color: var(--gray-200);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.main-container ul {
+    margin: 1rem 0 1rem 2rem;
+    color: var(--gray-200);
+}
+
+.main-container li {
+    margin-bottom: 0.5rem;
     line-height: 1.6;
-    margin-bottom: 15px;
-    text-align: justify;
+}
+
+/* Back to home link styling */
+.main-container > a {
+    display: inline-block;
+    margin-top: 3rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--gray-800);
+    color: var(--blue-400);
+    text-decoration: none;
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-700);
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.main-container > a:hover {
+    background: var(--gray-700);
+    color: var(--blue-300);
+    transform: translateY(-1px);
+}
+
+/* Email links */
+.main-container a[href^="mailto:"] {
+    color: var(--blue-400);
+    text-decoration: underline;
+    text-decoration-color: var(--blue-500);
+    text-underline-offset: 2px;
+}
+
+.main-container a[href^="mailto:"]:hover {
+    color: var(--blue-300);
+    text-decoration-color: var(--blue-400);
 }
 
 a {
@@ -719,45 +809,24 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Policy Section Headings */
-.policy-section {
-    margin-bottom: 32px;
-    margin-top: 32px;
-}
-.policy-section:first-child {
-    margin-top: 0;
-}
-.policy-section h2 {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-    color: #e0e0e0;
-    border-bottom: 1px solid #333;
-    padding-bottom: 6px;
-}
-.policy-section h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #333;
-}
-.policy-section ul {
-    margin-left: 24px;
-    margin-bottom: 10px;
-}
-.policy-section li {
-    margin-bottom: 7px;
-    line-height: 1.7;
-}
-.policy-section hr {
-    border: none;
-    border-top: 1px solid #eee;
-    margin: 24px 0;
-}
-
-/* Make sure paragraphs in policy sections have spacing */
-.policy-section p {
-    margin-bottom: 12px;
+/* Responsive design for policy pages */
+@media (max-width: 768px) {
+    .main-container {
+        padding: 1rem;
+        max-width: 100%;
+    }
+    
+    .main-container h1 {
+        font-size: 2rem;
+    }
+    
+    .main-container h2 {
+        font-size: 1.25rem;
+    }
+    
+    .main-container ul {
+        margin-left: 1.5rem;
+    }
 }
 
 .footer-links {
