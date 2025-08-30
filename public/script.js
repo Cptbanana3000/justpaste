@@ -203,6 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
         switchTab('write');
         // Always load Adsterra in the top slot on home/editor page
         renderAdsterra(topAdSlot);
+        // Load native banner under controls
+        renderRevenueCpmNative('native-ad-mount-editor');
     }
 
     function showInfoView(data) { // data: { id, shortId, editCode, message, viewCount }
@@ -259,6 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Always load Adsterra ad in the top slot on view page
     renderAdsterra(topAdSlot);
+    // Load native banner on view page as well
+    renderRevenueCpmNative('native-ad-mount-view');
 
     // User-generated content should not be indexed
     setRobotsNoIndex(true);
@@ -533,9 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Adsterra integration (no gating) ---
     function teardownAds() {
-        if (topAdSlot) {
-            topAdSlot.innerHTML = '';
-        }
+        if (topAdSlot) topAdSlot.innerHTML = '';
     }
 
     function renderAdsterra(targetContainer) {
@@ -554,17 +556,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const invokeScript = document.createElement('script');
         invokeScript.type = 'text/javascript';
-        invokeScript.src = `//www.highperformanceformat.com/${key}/invoke.js`;
+        invokeScript.src = `https://www.highperformanceformat.com/${key}/invoke.js`;
 
         targetContainer.appendChild(optionsScript);
         targetContainer.appendChild(invokeScript);
+    }
+
+    // RevenueCPM Native (1:4) loader
+    function renderRevenueCpmNative(mountElementId) {
+        const mount = document.getElementById(mountElementId);
+        if (!mount) return;
+        // Ensure only one expected container id exists anywhere
+        const requiredId = 'container-3b3095fb6c40ae8dd4b71c03741aaadf';
+        const existing = document.getElementById(requiredId);
+        if (existing && existing.parentElement) {
+            existing.parentElement.removeChild(existing);
+        }
+        // Remove any previously injected RevenueCPM scripts to allow re-execution
+        const existingScripts = Array.from(document.querySelectorAll('script'))
+          .filter(s => s.src && s.src.includes('revenuecpmgate.com/3b3095fb6c40ae8dd4b71c03741aaadf/invoke.js'));
+        existingScripts.forEach(s => s.parentElement && s.parentElement.removeChild(s));
+        // Reset mount and create the exact container id the script expects
+        mount.innerHTML = '';
+        const container = document.createElement('div');
+        container.id = requiredId;
+        container.className = 'ad-slot';
+        mount.appendChild(container);
+
+        const script = document.createElement('script');
+        script.async = true;
+        script.setAttribute('data-cfasync', 'false');
+        const cacheBuster = Date.now().toString();
+        script.src = `https://pl27540461.revenuecpmgate.com/3b3095fb6c40ae8dd4b71c03741aaadf/invoke.js?cb=${cacheBuster}`;
+        mount.appendChild(script);
     }
 
     // Re-render ad on resize (debounced) to switch between mobile/desktop units
     let adResizeTimeout;
     window.addEventListener('resize', () => {
         clearTimeout(adResizeTimeout);
-        adResizeTimeout = setTimeout(() => renderAdsterra(topAdSlot), 250);
+        adResizeTimeout = setTimeout(() => {
+            renderAdsterra(topAdSlot);
+        }, 250);
     });
     
     // --- Event Listeners ---

@@ -91,11 +91,14 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: [
-          "'self'", "'unsafe-inline'",
+          "'self'", "'unsafe-inline'", "'unsafe-eval'",
           "https://www.googletagmanager.com", "https://*.google-analytics.com", "https://*.analytics.google.com",
           "https://cdnjs.cloudflare.com",
           "https://cdn.jsdelivr.net",
-          "https://www.highperformanceformat.com"
+          "https://www.highperformanceformat.com",
+          "https://professionaltrafficmonitor.com",
+          "https://torchfriendlypay.com",
+          "https://*.revenuecpmgate.com", "https://revenuecpmgate.com"
         ],
         styleSrc: [
           "'self'", "'unsafe-inline'", "https://fonts.googleapis.com",
@@ -103,7 +106,8 @@ app.use(
         ],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: [
-          "'self'", "data:", "https://www.google-analytics.com", "https://*.google-analytics.com",
+          "'self'", "data:", "https:",
+          "https://www.google-analytics.com", "https://*.google-analytics.com",
           "https://*.analytics.google.com", "https://*.google.com",
           "https://www.googletagmanager.com",
           "https://tinylaun.ch",
@@ -114,7 +118,10 @@ app.use(
         connectSrc: [
           "'self'",
           "https://*.google-analytics.com", "https://*.analytics.google.com",
-          "https://firestore.googleapis.com", "https://*.firebaseio.com"
+          "https://firestore.googleapis.com", "https://*.firebaseio.com",
+          "https://professionaltrafficmonitor.com", "https://torchfriendlypay.com",
+          "https://www.highperformanceformat.com", "https://highperformanceformat.com",
+          "https:"
         ],
       },
     },

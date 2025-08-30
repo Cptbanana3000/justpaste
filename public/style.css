@@ -1113,6 +1113,13 @@ a:hover {
     min-height: 90px;
 }
 
+/* (removed mid slot styles) */
+
+/* Native ad tweaks */
+.ad-native {
+    margin-top: 12px;
+}
+
 @media (max-width: 768px) {
     .ad-slot {
         max-width: 320px;
