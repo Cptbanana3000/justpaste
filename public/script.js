@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editCodeSection = document.getElementById('edit-code-section');
 
     const noteContentDisplay = document.getElementById('noteContentDisplay');
-    const adContainer = document.getElementById('ad-container');
+    const topAdSlot = document.getElementById('top-ad-slot');
     const initialViewCountDisplay = document.getElementById('initialViewCountDisplay');
     const noteViewCountDisplay = document.getElementById('noteViewCountDisplay');
     const noteTimestampDisplay = document.getElementById('noteTimestamp');
@@ -201,6 +201,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Reset to Write tab
         switchTab('write');
+        // Always load Adsterra in the top slot on home/editor page
+        renderAdsterra(topAdSlot);
     }
 
     function showInfoView(data) { // data: { id, shortId, editCode, message, viewCount }
@@ -255,8 +257,8 @@ document.addEventListener('DOMContentLoaded', () => {
     currentNoteId = noteData.id;
     currentShortId = noteData.shortId;
 
-    // Only load ads on substantial content pages
-    maybeLoadAdsForNote(noteData);
+    // Always load Adsterra ad in the top slot on view page
+    renderAdsterra(topAdSlot);
 
     // User-generated content should not be indexed
     setRobotsNoIndex(true);
@@ -529,68 +531,41 @@ document.addEventListener('DOMContentLoaded', () => {
         router();
     }
 
-    // --- AdSense manual gating ---
-    function getWordCountFromHtml(html) {
-        const tmp = document.createElement('div');
-        tmp.innerHTML = html;
-        const text = tmp.textContent || tmp.innerText || '';
-        return (text.trim().match(/\S+/g) || []).length;
-    }
-
-    function ensureAdSenseScriptLoaded() {
-        if (window.adsbygoogle) return true; // likely already present
-        const existing = document.querySelector('script[data-adsbygoogle]');
-        if (existing) return true;
-        const s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2387807071256876';
-        s.setAttribute('crossorigin', 'anonymous');
-        s.setAttribute('data-adsbygoogle', '1');
-        document.head.appendChild(s);
-        return false; // not yet loaded
-    }
-
+    // --- Adsterra integration (no gating) ---
     function teardownAds() {
-        if (!adContainer) return;
-        adContainer.style.display = 'none';
-        adContainer.innerHTML = '';
-    }
-
-    function maybeLoadAdsForNote(noteData) {
-        if (!adContainer) return;
-        const wordCount = getWordCountFromHtml(noteContentDisplay.innerHTML);
-        const isEligible = wordCount >= 250; // threshold to avoid "no publisher content" violations
-        if (!isEligible) { teardownAds(); return; }
-
-        // Prepare container
-        adContainer.style.display = 'block';
-        adContainer.innerHTML = '';
-
-        // Ensure AdSense script is present
-        const ready = ensureAdSenseScriptLoaded();
-
-        // Create an ad unit
-        const ins = document.createElement('ins');
-        ins.className = 'adsbygoogle';
-        ins.style.display = 'block';
-        // Replace with your responsive ad unit slot if you have one; fallback to auto format
-        ins.setAttribute('data-ad-client', 'ca-pub-2387807071256876');
-        ins.setAttribute('data-ad-slot', 'auto');
-        ins.setAttribute('data-ad-format', 'auto');
-        ins.setAttribute('data-full-width-responsive', 'true');
-        adContainer.appendChild(ins);
-
-        function pushAd() {
-            try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) { /* no-op */ }
-        }
-
-        if (ready) {
-            pushAd();
-        } else {
-            // If script just injected, wait a bit then push
-            setTimeout(pushAd, 800);
+        if (topAdSlot) {
+            topAdSlot.innerHTML = '';
         }
     }
+
+    function renderAdsterra(targetContainer) {
+        if (!targetContainer) return;
+        targetContainer.style.display = 'block';
+        targetContainer.innerHTML = '';
+
+        const isMobile = window.innerWidth <= 768;
+        const key = isMobile ? 'e1786569efff04fd564619596fc583f5' : '7ac8da3d9a7f06b9b3dec589aa0511fa';
+        const width = isMobile ? 320 : 728;
+        const height = isMobile ? 50 : 90;
+
+        const optionsScript = document.createElement('script');
+        optionsScript.type = 'text/javascript';
+        optionsScript.text = `\n\tatOptions = {\n\t\t'key' : '${key}',\n\t\t'format' : 'iframe',\n\t\t'height' : ${height},\n\t\t'width' : ${width},\n\t\t'params' : {}\n\t};\n`;
+
+        const invokeScript = document.createElement('script');
+        invokeScript.type = 'text/javascript';
+        invokeScript.src = `//www.highperformanceformat.com/${key}/invoke.js`;
+
+        targetContainer.appendChild(optionsScript);
+        targetContainer.appendChild(invokeScript);
+    }
+
+    // Re-render ad on resize (debounced) to switch between mobile/desktop units
+    let adResizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(adResizeTimeout);
+        adResizeTimeout = setTimeout(() => renderAdsterra(topAdSlot), 250);
+    });
     
     // --- Event Listeners ---
     if(saveButton) saveButton.addEventListener('click', saveNote);

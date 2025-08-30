@@ -1093,6 +1093,33 @@ a:hover {
     border-top: 1px solid var(--gray-700);
 }
 
+/* Top ad container: fixed at top of content area */
+.ad-top {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-700);
+    background: var(--black);
+}
+
+.ad-slot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 728px;
+    min-height: 90px;
+}
+
+@media (max-width: 768px) {
+    .ad-slot {
+        max-width: 320px;
+        min-height: 50px;
+    }
+}
+
 /* Additional responsive styles */
 @media (max-width: 480px) {
     .markdown-preview,

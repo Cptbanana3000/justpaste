@@ -93,43 +93,28 @@ app.use(
         scriptSrc: [
           "'self'", "'unsafe-inline'",
           "https://www.googletagmanager.com", "https://*.google-analytics.com", "https://*.analytics.google.com",
-          "https://pagead2.googlesyndication.com", "https://*.googlesyndication.com",
-          "https://*.doubleclick.net", "https://partner.googleadservices.com",
-          "https://tpc.googlesyndication.com", "https://googleads.g.doubleclick.net",
-          "https://ep1.adtrafficquality.google", // The domain from the previous error
-          "https://ep2.adtrafficquality.google",
           "https://cdnjs.cloudflare.com",
-          "https://cdn.jsdelivr.net"
+          "https://cdn.jsdelivr.net",
+          "https://www.highperformanceformat.com"
         ],
         styleSrc: [
           "'self'", "'unsafe-inline'", "https://fonts.googleapis.com",
-          "https://pagead2.googlesyndication.com",
           "https://cdnjs.cloudflare.com"
         ],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: [
           "'self'", "data:", "https://www.google-analytics.com", "https://*.google-analytics.com",
-          "https://*.analytics.google.com", "https://pagead2.googlesyndication.com",
-          "https://*.googlesyndication.com", "https://*.g.doubleclick.net", "https://*.google.com",
-          "https://ep1.adtrafficquality.google", "https://ep2.adtrafficquality.google",
+          "https://*.analytics.google.com", "https://*.google.com",
           "https://www.googletagmanager.com",
           "https://tinylaun.ch",
           "https://www.tinylaun.ch",
           "https://tinylaun.ch/tinylaunch_badge_launching_soon.svg"
         ],
-        frameSrc: [
-          "'self'", "https://*.doubleclick.net", "https://*.google.com",
-          "https://googleads.g.doubleclick.net", "https://tpc.googlesyndication.com",
-          "https://pagead2.googlesyndication.com", "https://*.googlesyndication.com",
-          "https://ep1.adtrafficquality.google", "https://ep2.adtrafficquality.google"
-        ],
+        frameSrc: ["'self'", "https:", "data:", "https://www.highperformanceformat.com", "https://highperformanceformat.com"],
         connectSrc: [
           "'self'",
           "https://*.google-analytics.com", "https://*.analytics.google.com",
-          "https://firestore.googleapis.com", "https://*.firebaseio.com",
-          "https://pagead2.googlesyndication.com", "https://*.googlesyndication.com",
-          "https://*.g.doubleclick.net", "https://googleads.g.doubleclick.net",
-          "https://ep1.adtrafficquality.google" // ** FIX: Added new domain for ad traffic quality **
+          "https://firestore.googleapis.com", "https://*.firebaseio.com"
         ],
       },
     },

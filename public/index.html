@@ -13,6 +13,7 @@
       gtag('js', new Date());
       gtag('config', 'G-SR0YFBHC2N');
     </script>
+    
     <meta name="description" content="Flingnote lets you quickly save and share plain text notes, code, and snippets. No sign-up required. Fast, simple, and privacy-friendly.">
     <link rel="canonical" href="https://flingnote.click/">
     
@@ -59,7 +60,7 @@
                 "contactPoint": {
                     "@type": "ContactPoint",
                     "contactType": "customer support",
-                    "email": "flingnote@proton.me"
+                    "email": "flingnote@tutamail.com"
                 }
             }
         }
@@ -67,6 +68,9 @@
 </head>
 <body>
     <div class="main-container">
+        <div id="top-ad-container" class="ad-container ad-top">
+            <div id="top-ad-slot" class="ad-slot"></div>
+        </div>
         <!-- Rate Limit Alert -->
         <div id="rateLimitAlert" class="rate-limit-alert" style="display: none;">
             <span class="alert-icon">⚠️</span>
@@ -79,13 +83,11 @@
         </div>
 
         <header class="app-header">
-            <!-- <a href="https://tinylaun.ch" target="_blank" rel="noopener">
-                <img src="https://tinylaun.ch/tinylaunch_badge_launching_soon.svg" alt="TinyLaunch Badge" style="width:202px; height:auto;" />
-            </a> -->
+            
             <h1><a href="/"><img src="./assets/logo.png" alt="Flingnote" id="site-logo"></a></h1>
             <p class="subtitle">Quickly save and share text snippets. <a href="/blog/" style="margin-left:8px; font-weight:600;">Blog</a></p>
             <p style="font-size: 0.9em; margin-top: 10px;">
-                <!-- <a href="https://www.flingnote.click/eHuoMU">See an Example Paste</a> -->
+               
             </p>
         </header>
 
@@ -179,7 +181,6 @@
                     <p class="timestamp"><em id="noteTimestamp"></em></p>
                     <p class="view-count">Views: <span id="noteViewCountDisplay">0</span></p>
                 </div>
-                <div id="ad-container" class="ad-container" style="display:none"></div>
                 <div class="button-group">
                     <button id="editThisNoteButton" class="btn btn-secondary">Edit Note</button>
                     <button id="createNewNoteFromViewButton" class="btn btn-primary">New</button>
