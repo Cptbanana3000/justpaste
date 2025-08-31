@@ -203,8 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
         switchTab('write');
         // Always load Adsterra in the top slot on home/editor page
         renderAdsterra(topAdSlot);
-        // Load native banner under controls
-        renderRevenueCpmNative('native-ad-mount-editor');
+        // Lazy-load native when near viewport
+        setupNativeLazyLoad();
     }
 
     function showInfoView(data) { // data: { id, shortId, editCode, message, viewCount }
@@ -261,8 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Always load Adsterra ad in the top slot on view page
     renderAdsterra(topAdSlot);
-    // Load native banner on view page as well
-    renderRevenueCpmNative('native-ad-mount-view');
+    // Lazy-load native when near viewport
+    setupNativeLazyLoad();
 
     // User-generated content should not be indexed
     setRobotsNoIndex(true);
@@ -560,6 +560,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         targetContainer.appendChild(optionsScript);
         targetContainer.appendChild(invokeScript);
+
+        // Adjust spacer height on mobile when fixed
+        const spacer = document.getElementById('top-ad-spacer');
+        if (spacer) {
+            setTimeout(() => {
+                const rect = targetContainer.getBoundingClientRect();
+                // Only adjust on small screens where banner may be fixed
+                if (window.innerWidth <= 768) {
+                    spacer.style.height = Math.max(rect.height || 50, 50) + 'px';
+                } else {
+                    spacer.style.height = '0px';
+                }
+            }, 600);
+        }
     }
 
     // RevenueCPM Native (1:4) loader
@@ -581,6 +595,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.createElement('div');
         container.id = requiredId;
         container.className = 'ad-slot';
+        // Add skeleton while loading
+        container.classList.add('ad-skeleton');
         mount.appendChild(container);
 
         const script = document.createElement('script');
@@ -589,6 +605,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const cacheBuster = Date.now().toString();
         script.src = `https://pl27540461.revenuecpmgate.com/3b3095fb6c40ae8dd4b71c03741aaadf/invoke.js?cb=${cacheBuster}`;
         mount.appendChild(script);
+
+        // Simple skeleton removal after timeout - no observer to avoid performance issues
+        setTimeout(() => {
+            const node = document.getElementById(requiredId);
+            if (node) {
+                node.classList.remove('ad-skeleton');
+            }
+        }, 3000);
+    }
+
+    // Lazy-load native ads: trigger when mounts enter viewport
+    function setupNativeLazyLoad() {
+        const mounts = ['native-ad-mount-editor', 'native-ad-mount-view']
+            .map(id => document.getElementById(id))
+            .filter(Boolean);
+        if (mounts.length === 0) return;
+        if (!('IntersectionObserver' in window)) {
+            mounts.forEach(m => renderRevenueCpmNative(m.id));
+            return;
+        }
+        const io = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    renderRevenueCpmNative(entry.target.id);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { root: null, rootMargin: '200px 0px', threshold: 0.01 });
+        mounts.forEach(m => io.observe(m));
     }
 
     // Re-render ad on resize (debounced) to switch between mobile/desktop units
