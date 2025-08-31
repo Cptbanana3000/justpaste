@@ -540,10 +540,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderAdsterra(targetContainer) {
         if (!targetContainer) return;
         targetContainer.style.display = 'block';
-        targetContainer.innerHTML = '';
 
         const isMobile = window.innerWidth <= 768;
         const key = isMobile ? 'e1786569efff04fd564619596fc583f5' : '7ac8da3d9a7f06b9b3dec589aa0511fa';
+
+        if (targetContainer.dataset && targetContainer.dataset.adKey === key) {
+            return;
+        }
+        if (targetContainer.dataset) {
+            targetContainer.dataset.adKey = key;
+        }
+
+        targetContainer.innerHTML = '';
+
         const width = isMobile ? 320 : 728;
         const height = isMobile ? 50 : 90;
 
@@ -635,11 +644,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Re-render ad on resize (debounced) to switch between mobile/desktop units
     let adResizeTimeout;
+    let lastIsMobile = window.innerWidth <= 768;
     window.addEventListener('resize', () => {
         clearTimeout(adResizeTimeout);
         adResizeTimeout = setTimeout(() => {
-            renderAdsterra(topAdSlot);
-        }, 250);
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile !== lastIsMobile) {
+                renderAdsterra(topAdSlot);
+                lastIsMobile = isMobile;
+            }
+        }, 700);
     });
     
     // --- Event Listeners ---
