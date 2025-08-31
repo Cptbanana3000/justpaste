@@ -188,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setActiveView(editorArea);
         if (codeAccessRow) codeAccessRow.style.display = 'flex';
     showAds(false);
-    teardownAds();
         setRobotsNoIndex(false);
         textContent.value = '';
         editCodeInput.value = '';
@@ -210,7 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function showInfoView(data) { // data: { id, shortId, editCode, message, viewCount }
         setActiveView(infoArea);
     showAds(false);
-    teardownAds();
     setRobotsNoIndex(false);
         messageDisplay.textContent = data.message || 'Note saved successfully!';
         
@@ -271,7 +269,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function showEditView(noteContent) {
         setActiveView(editorArea);
     showAds(false);
-    teardownAds();
     setRobotsNoIndex(false);
         if (codeAccessRow) codeAccessRow.style.display = 'none';
         textContent.value = noteContent;
