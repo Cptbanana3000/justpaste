@@ -79,6 +79,71 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX_CONTENT_SIZE = 20 * 1024; // 20KB in bytes
     const MAX_CONTENT_SIZE_DISPLAY = '20KB';
 
+    // --- E2EE Helpers (AES-GCM) ---
+    const textEncoder = new TextEncoder();
+    const textDecoder = new TextDecoder();
+    let currentEncryptionKey = null; // CryptoKey
+    let currentEncryptionKeyB64 = null; // base64 string
+
+    function getRandomIv() {
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        return iv;
+    }
+
+    async function generateAesKey() {
+        return await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+    }
+
+    async function exportKeyToBase64(key) {
+        const raw = await crypto.subtle.exportKey('raw', key);
+        return arrayBufferToBase64(raw);
+    }
+
+    async function importKeyFromBase64(b64) {
+        const raw = base64ToUint8Array(b64);
+        return await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+    }
+
+    async function encryptString(plaintext, key) {
+        const iv = getRandomIv();
+        const pt = textEncoder.encode(plaintext);
+        const ctBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, pt);
+        const ivB64 = arrayBufferToBase64(iv);
+        const ctB64 = arrayBufferToBase64(ctBuf);
+        return { ivB64, ctB64 };
+    }
+
+    async function decryptString(ivB64, ctB64, key) {
+        const iv = base64ToUint8Array(ivB64);
+        const ct = base64ToUint8Array(ctB64);
+        const ptBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+        return textDecoder.decode(ptBuf);
+    }
+
+    function arrayBufferToBase64(buf) {
+        const bytes = new Uint8Array(buf);
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        return btoa(binary);
+    }
+
+    function base64ToUint8Array(b64) {
+        const binary = atob(b64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return bytes;
+    }
+
+    function parseHashParams() {
+        const hash = (window.location.hash || '').replace(/^#/, '');
+        const params = {};
+        hash.split('&').forEach(kv => {
+            const [k, v] = kv.split('=');
+            if (k) params[decodeURIComponent(k)] = v ? decodeURIComponent(v) : '';
+        });
+        return params;
+    }
+
     function showAds(visible) {
         const displayValue = visible ? 'flex' : 'none'; // Use 'flex' as per your CSS for ad-banner
         if (topAdBanner) topAdBanner.style.display = displayValue;
@@ -212,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setRobotsNoIndex(false);
         messageDisplay.textContent = data.message || 'Note saved successfully!';
         
-        // Path-based URLs
+        // Path-based URLs (no encryption key in fragment)
         const viewUrl = new URL(`/${data.shortId}`, window.location.origin).href;
         const editUrl = new URL(`/${data.shortId}/edit#${data.editCode}`, window.location.origin).href;
 
@@ -312,14 +377,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (forEditing && window.location.hash) {
-            // The fragment will be like '#SECRET_EDIT_CODE'. We remove the '#'
-            const potentialEditCode = window.location.hash.substring(1);
-            if (potentialEditCode) {
-                console.log("Edit code found in URL fragment.");
-                currentEditCode = potentialEditCode;
-            }
-        }
         showLoadingState(true);
         try {
             const response = await fetch(`${API_BASE_URL_ROOT}/api/notes/s/${cleanShortId}`);
@@ -329,8 +386,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             currentNoteId = data.id;
             currentShortId = data.shortId;
-            // currentEditCode is only known if user provides it for editing, or after saving.
-            // If forEditing is true, we expect user to input editCode.
             
             if (forEditing) {
                 showEditView(data.content);

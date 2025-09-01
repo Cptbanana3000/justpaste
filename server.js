@@ -15,6 +15,53 @@ const PORT = process.env.PORT || 3000;
 const MAX_CONTENT_SIZE = 20 * 1024; // 20KB in bytes
 const MAX_CONTENT_SIZE_MB = '20KB'; // For error messages
 
+// --- Server-side encryption (AES-256-GCM) ---
+const NOTE_ENC_KEY_B64 = process.env.NOTE_ENC_KEY_B64 || '';
+let NOTE_ENC_KEY = null;
+if (!NOTE_ENC_KEY_B64) {
+  console.warn('WARNING: NOTE_ENC_KEY_B64 is not set. Notes will be stored in plaintext.');
+} else {
+  try {
+    const keyBuf = Buffer.from(NOTE_ENC_KEY_B64, 'base64');
+    if (keyBuf.length !== 32) throw new Error('Key must be 32 bytes (base64 of 256-bit)');
+    NOTE_ENC_KEY = keyBuf;
+  } catch (e) {
+    console.error('Invalid NOTE_ENC_KEY_B64:', e.message);
+    process.exit(1);
+  }
+}
+
+function encryptContent(plaintext) {
+  if (!NOTE_ENC_KEY) return plaintext; // plaintext fallback
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', NOTE_ENC_KEY, iv);
+  const ct = Buffer.concat([cipher.update(Buffer.from(plaintext, 'utf8')), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  const ivB64 = iv.toString('base64');
+  const ctB64 = ct.toString('base64');
+  const tagB64 = tag.toString('base64');
+  return `${ivB64}:${ctB64}:${tagB64}`;
+}
+
+function decryptContent(stored) {
+  if (!NOTE_ENC_KEY) return stored; // plaintext fallback
+  if (typeof stored !== 'string') return stored;
+  const parts = stored.split(':');
+  if (parts.length !== 3) return stored; // not encrypted
+  const [ivB64, ctB64, tagB64] = parts;
+  try {
+    const iv = Buffer.from(ivB64, 'base64');
+    const ct = Buffer.from(ctB64, 'base64');
+    const tag = Buffer.from(tagB64, 'base64');
+    const decipher = crypto.createDecipheriv('aes-256-gcm', NOTE_ENC_KEY, iv);
+    decipher.setAuthTag(tag);
+    const pt = Buffer.concat([decipher.update(ct), decipher.final()]);
+    return pt.toString('utf8');
+  } catch (e) {
+    return stored; // if decrypt fails (legacy), return as-is
+  }
+}
+
 // Content size validation middleware
 const validateContentSize = (req, res, next) => {
     const content = req.body.content;
@@ -201,9 +248,12 @@ app.post('/api/notes', createNoteLimiter, validateContentSize, async (req, res) 
       idExists = doc.exists;
     }
 
+    // Encrypt content for storage
+    const storedContent = encryptContent(content);
+
     // Save the note with both IDs
     await notesCollection.doc(noteId).set({
-      content,
+      content: storedContent,
       editCode,
       shortId,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -239,8 +289,9 @@ app.get('/api/notes/:id', async (req, res) => {
     // Get the updated document
     const updatedDoc = await noteRef.get();
     const noteData = updatedDoc.data();
+    const plaintext = decryptContent(noteData.content);
     res.status(200).json({
-      content: noteData.content,
+      content: plaintext,
       id: updatedDoc.id,
       createdAt: noteData.createdAt ? noteData.createdAt.toDate() : null,
       views: noteData.views || 1
@@ -262,8 +313,9 @@ app.get('/api/notes/:id/raw', async (req, res) => {
     }
 
     const noteData = noteDoc.data();
+    const plaintext = decryptContent(noteData.content);
     res.setHeader('Content-Type', 'text/plain');
-    res.send(noteData.content);
+    res.send(plaintext);
   } catch (error) {
     console.error('Error fetching raw note:', error);
     res.status(500).send('Server error while fetching raw note.');
@@ -292,10 +344,12 @@ app.put('/api/notes/:id', updateNoteLimiter, validateContentSize, async (req, re
       return res.status(403).json({ message: 'Invalid edit code. You are not authorized to edit this note.' });
     }
 
+    const storedContent = encryptContent(content);
+
     await noteRef.update({
-      content,
+      content: storedContent,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      size: Buffer.byteLength(content, 'utf8') // Update the size
+      size: Buffer.byteLength(content, 'utf8') // Update the size (plaintext size)
     });
 
     res.status(200).json({ message: 'Note updated successfully.', id: noteDoc.id });
@@ -320,8 +374,9 @@ app.get('/api/notes/s/:shortId', async (req, res) => {
     // Get the updated document
     const updatedDoc = await noteRef.get();
     const noteData = updatedDoc.data();
+    const plaintext = decryptContent(noteData.content);
     res.status(200).json({
-      content: noteData.content,
+      content: plaintext,
       id: updatedDoc.id,
       shortId: noteData.shortId,
       createdAt: noteData.createdAt ? noteData.createdAt.toDate() : null,
