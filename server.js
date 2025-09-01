@@ -11,6 +11,9 @@ const helmet = require('helmet');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust Render/Proxy for correct client IPs
+app.set('trust proxy', 1);
+
 // Content size limits
 const MAX_CONTENT_SIZE = 20 * 1024; // 20KB in bytes
 const MAX_CONTENT_SIZE_MB = '20KB'; // For error messages
