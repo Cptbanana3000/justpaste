@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flingnote Admin</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0b0b0b; color:#e8e8e8; margin:0; padding:16px; }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+    .card { background:#121212; border:1px solid #2a2a2a; border-radius:8px; padding:12px; margin-bottom:12px; }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap: wrap; }
+    input, select, textarea { background:#0f0f0f; color:#e8e8e8; border:1px solid #2a2a2a; border-radius:6px; padding:8px; }
+    button { background:#1f1f1f; color:#fff; border:1px solid #2a2a2a; border-radius:6px; padding:8px 10px; cursor:pointer; }
+    button:hover { background:#2a2a2a; }
+    table { width:100%; border-collapse:collapse; margin-top:8px; }
+    th, td { border-bottom:1px solid #2a2a2a; padding:8px; text-align:left; vertical-align: top; }
+    .pill { display:inline-block; padding:2px 6px; border-radius:999px; font-size:12px; border:1px solid #3a3a3a; }
+    .pill.open { background:#291a00; color:#ffc107; border-color:#3d2c00; }
+    .pill.closed { background:#0f1a0f; color:#97ff97; border-color:#1d3a1d; }
+    .actions { display:flex; gap:6px; flex-wrap: wrap; }
+    .muted { color:#aaa; font-size:12px; }
+  </style>
+</head>
+<body>
+  <h1>Flingnote Admin</h1>
+  <div class="card">
+    <div class="row">
+      <label for="token">Admin Token</label>
+      <input id="token" type="password" placeholder="Enter ADMIN_TOKEN" style="min-width:280px" />
+      <button id="saveToken">Save</button>
+      <span class="muted" id="tokenStatus"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <label for="status">Reports</label>
+      <select id="status">
+        <option value="open" selected>Open</option>
+        <option value="closed">Closed</option>
+      </select>
+      <label for="limit">Limit</label>
+      <select id="limit">
+        <option>25</option>
+        <option selected>50</option>
+        <option>100</option>
+      </select>
+      <label for="shortId">Short ID</label>
+      <input id="shortId" placeholder="zn2Jj5" style="width:140px" />
+      <button id="refresh">Refresh</button>
+      <span class="muted" id="loadMsg"></span>
+    </div>
+    <div id="reports"></div>
+  </div>
+
+<script>
+(function(){
+  const apiBase = '';
+  const tokenInput = document.getElementById('token');
+  const saveTokenBtn = document.getElementById('saveToken');
+  const tokenStatus = document.getElementById('tokenStatus');
+  const statusSel = document.getElementById('status');
+  const limitSel = document.getElementById('limit');
+  const shortIdInput = document.getElementById('shortId');
+  const refreshBtn = document.getElementById('refresh');
+  const reportsDiv = document.getElementById('reports');
+  const loadMsg = document.getElementById('loadMsg');
+
+  function getToken(){ return sessionStorage.getItem('admin_token') || ''; }
+  function setToken(val){ sessionStorage.setItem('admin_token', val || ''); }
+
+  function authHeaders(){
+    const t = getToken();
+    return t ? { 'Authorization': 'Bearer ' + t } : {}; 
+  }
+
+  function fmtDate(d){ try { return new Date(d).toLocaleString(); } catch(_) { return d || ''; } }
+
+  async function fetchReports(){
+    reportsDiv.innerHTML = '';
+    loadMsg.textContent = 'Loading...';
+    try {
+      const params = new URLSearchParams({ status: statusSel.value, limit: limitSel.value });
+      const sid = shortIdInput.value.trim();
+      if (sid) params.set('shortId', sid);
+      const resp = await fetch(`${apiBase}/api/admin/reports?` + params.toString(), { headers: { ...authHeaders() } });
+      if (!resp.ok){ throw new Error((await resp.json()).message || 'Failed to load'); }
+      const data = await resp.json();
+      renderReports(data.items || []);
+      loadMsg.textContent = `${(data.items||[]).length} reports`;
+    } catch (e){
+      loadMsg.textContent = e.message || 'Error';
+    }
+  }
+
+  function renderReports(items){
+    if (!items.length){ reportsDiv.innerHTML = '<div class="muted">No reports</div>'; return; }
+    const rows = items.map(item => {
+      const created = item.createdAt ? fmtDate(item.createdAt) : '';
+      const status = item.status === 'closed' ? '<span class="pill closed">closed</span>' : '<span class="pill open">open</span>';
+      const noteLink = item.shortId ? `/${item.shortId}` : '';
+      return `
+      <tr>
+        <td>${status}</td>
+        <td>
+          <div><strong>Note:</strong> ${item.shortId || ''}</div>
+          <div class="muted">Report: ${escapeHtml(item.reason || '')}</div>
+          <div class="muted">Details: ${escapeHtml(item.details || '')}</div>
+        </td>
+        <td>
+          <div class="muted">${created}</div>
+          <div class="muted">Reporter: ${item.reporterHash ? item.reporterHash.slice(0,10)+'…' : ''}</div>
+        </td>
+        <td class="actions">
+          ${noteLink ? `<a href="${noteLink}" target="_blank"><button>Open</button></a>` : ''}
+          <button data-note="${item.noteId}" data-action="delete">Delete</button>
+          <button data-note="${item.noteId}" data-action="restore">Restore</button>
+          ${item.status !== 'closed' ? `<button data-report="${item.id}" data-action="close">Close report</button>` : ''}
+        </td>
+      </tr>`;
+    }).join('');
+    reportsDiv.innerHTML = `<table><thead><tr><th>Status</th><th>Info</th><th>Meta</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+
+    reportsDiv.querySelectorAll('button[data-action]').forEach(btn => {
+      const action = btn.getAttribute('data-action');
+      const noteId = btn.getAttribute('data-note');
+      const reportId = btn.getAttribute('data-report');
+      if (action === 'delete') btn.onclick = () => updateNote(noteId, true);
+      if (action === 'restore') btn.onclick = () => updateNote(noteId, false);
+      if (action === 'close') btn.onclick = () => closeReport(reportId);
+    });
+  }
+
+  async function updateNote(noteId, del){
+    if (!noteId) return;
+    try {
+      const url = del ? `${apiBase}/api/admin/notes/${noteId}/delete` : `${apiBase}/api/admin/notes/${noteId}/restore`;
+      const resp = await fetch(url, { method: 'POST', headers: { ...authHeaders() } });
+      if (!resp.ok){ throw new Error((await resp.json()).message || 'Failed'); }
+      await fetchReports();
+    } catch (e){ alert(e.message || 'Failed'); }
+  }
+
+  async function closeReport(reportId){
+    if (!reportId) return;
+    try {
+      const resp = await fetch(`${apiBase}/api/admin/reports/${reportId}/close`, { method: 'POST', headers: { ...authHeaders() } });
+      if (!resp.ok){ throw new Error((await resp.json()).message || 'Failed'); }
+      await fetchReports();
+    } catch (e){ alert(e.message || 'Failed'); }
+  }
+
+  function escapeHtml(str){
+    return (str || '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[s]));
+  }
+
+  document.getElementById('saveToken').onclick = () => {
+    sessionStorage.setItem('admin_token', tokenInput.value.trim());
+    tokenStatus.textContent = 'Saved';
+    setTimeout(() => tokenStatus.textContent = '', 1500);
+  };
+  document.getElementById('refresh').onclick = fetchReports;
+
+  const existing = sessionStorage.getItem('admin_token') || '';
+  if (existing) tokenInput.value = existing;
+  fetchReports();
+})();
+</script>
+</body>
+</html>

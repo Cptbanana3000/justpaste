@@ -22,7 +22,12 @@ const MAX_CONTENT_SIZE_MB = '20KB'; // For error messages
 const NOTE_ENC_KEY_B64 = process.env.NOTE_ENC_KEY_B64 || '';
 let NOTE_ENC_KEY = null;
 if (!NOTE_ENC_KEY_B64) {
-  console.warn('WARNING: NOTE_ENC_KEY_B64 is not set. Notes will be stored in plaintext.');
+  if (process.env.NODE_ENV === 'production') {
+    console.error('NOTE_ENC_KEY_B64 missing in production.');
+    process.exit(1);
+  } else {
+    console.warn('WARNING: NOTE_ENC_KEY_B64 is not set. Notes will be stored in plaintext.');
+  }
 } else {
   try {
     const keyBuf = Buffer.from(NOTE_ENC_KEY_B64, 'base64');
@@ -65,6 +70,33 @@ function decryptContent(stored) {
   }
 }
 
+// Abuse/reporting helpers
+const REPORT_HASH_SALT = process.env.REPORT_HASH_SALT || crypto.randomBytes(16).toString('hex');
+function hashReporter(ip, ua) {
+  const h = crypto.createHash('sha256');
+  h.update((ip || '') + '|' + (ua || '') + '|' + REPORT_HASH_SALT);
+  return h.digest('hex');
+}
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+const ADMIN_IP_ALLOWLIST = (process.env.ADMIN_IP_ALLOWLIST || '').split(',').map(s => s.trim()).filter(Boolean);
+function ipAllowed(req) {
+  if (!ADMIN_IP_ALLOWLIST.length) return true;
+  const ip = (req.ip || '').trim();
+  const v4 = ip.replace(/^::ffff:/, '');
+  return ADMIN_IP_ALLOWLIST.includes(ip) || ADMIN_IP_ALLOWLIST.includes(v4);
+}
+function requireAdmin(req, res, next) {
+  const auth = req.headers['authorization'] || '';
+  const token = auth.startsWith('Bearer ') ? auth.substring(7) : '';
+  if (!ADMIN_TOKEN || token !== ADMIN_TOKEN) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  if (!ipAllowed(req)) {
+    return res.status(401).json({ message: 'IP not allowed' });
+  }
+  next();
+}
+
 // Content size validation middleware
 const validateContentSize = (req, res, next) => {
     const content = req.body.content;
@@ -76,10 +108,6 @@ const validateContentSize = (req, res, next) => {
     if (!content.trim()) {
         return res.status(400).json({ message: 'Content cannot be empty.' });
     }
-    // Optionally, reject strings with only whitespace or control chars
-    // if (!/\S/.test(content)) {
-    //     return res.status(400).json({ message: 'Content must contain visible characters.' });
-    // }
     const contentSize = Buffer.byteLength(content, 'utf8');
     if (contentSize > MAX_CONTENT_SIZE) {
         const currentSizeKB = Math.round(contentSize / 1024);
@@ -96,16 +124,16 @@ const validateContentSize = (req, res, next) => {
 // General API limiter
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // Allow more general API reads
+  max: 200,
   message: { message: 'Too many requests from this IP, please try again after 15 minutes' },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // Stricter limiter for note creation
 const createNoteLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 30, // Allow more note creations per hour
+  max: 30,
   message: { message: 'Too many notes created from this IP, please try again after an hour' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -114,8 +142,17 @@ const createNoteLimiter = rateLimit({
 // Stricter limiter for note updates
 const updateNoteLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 30, // Allow more updates
+  max: 30,
   message: { message: 'Too many note updates from this IP, please try again after 15 minutes' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Limiter for reporting
+const reportNoteLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { message: 'Too many reports from this IP, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -133,6 +170,8 @@ try {
 
 const db = admin.firestore();
 const notesCollection = db.collection('notes'); // Define your Firestore collection name
+const reportsCollection = db.collection('reports');
+const moderationLogs = db.collection('moderationLogs');
 
 // Middleware
 app.use(
@@ -175,16 +214,43 @@ app.use(
         ],
       },
     },
+    referrerPolicy: { policy: 'no-referrer' },
+    frameguard: { action: 'sameorigin' },
     crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
-app.use(cors()); // Enable Cross-Origin Resource Sharing
+
+// CORS: restrict to allowed origins
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://flingnote.click'
+];
+app.use((req, res, next) => {
+  // Disallow CORS on admin endpoints
+  if (req.path.startsWith('/api/admin/')) return next();
+  return cors({ origin: (origin, cb) => {
+    if (!origin) return cb(null, true); // allow same-origin
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error('Not allowed by CORS'));
+  }})(req, res, next);
+});
+
 app.use(express.json({ limit: '200kb' })); // Set higher than our own limit so our middleware can handle it
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from 'public' directory
 
+// Add X-Robots-Tag for admin.html
+app.get('/admin.html', (req, res, next) => {
+  res.set('X-Robots-Tag', 'noindex, nofollow');
+  next();
+});
+
 // Apply rate limiting to all API routes
 app.use('/api/', apiLimiter);
+
+// Additional admin rate limiter
+const adminLimiter = rateLimit({ windowMs: 60 * 1000, max: 60, standardHeaders: true, legacyHeaders: false });
+app.use('/api/admin/', adminLimiter);
 
 // Global error handler for payload too large
 app.use((err, req, res, next) => {
@@ -261,7 +327,9 @@ app.post('/api/notes', createNoteLimiter, validateContentSize, async (req, res) 
       shortId,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       size: Buffer.byteLength(content, 'utf8'),
-      views: 0
+      views: 0,
+      reportCount: 0,
+      isDeleted: false
     });
 
     res.status(201).json({
@@ -286,6 +354,9 @@ app.get('/api/notes/:id', async (req, res) => {
     if (!noteDoc.exists) {
       return res.status(404).json({ message: 'Note not found.' });
     }
+
+    const baseData = noteDoc.data();
+    if (baseData.isDeleted) return res.status(404).json({ message: 'Note has been removed.' });
 
     // Increment the views field atomically
     await noteRef.update({ views: admin.firestore.FieldValue.increment(1) });
@@ -315,6 +386,9 @@ app.get('/api/notes/:id/raw', async (req, res) => {
       return res.status(404).send('Note not found.');
     }
 
+    const baseData = noteDoc.data();
+    if (baseData.isDeleted) return res.status(404).send('Note has been removed.');
+
     const noteData = noteDoc.data();
     const plaintext = decryptContent(noteData.content);
     res.setHeader('Content-Type', 'text/plain');
@@ -341,6 +415,9 @@ app.put('/api/notes/:id', updateNoteLimiter, validateContentSize, async (req, re
     if (!noteDoc.exists) {
       return res.status(404).json({ message: 'Note not found.' });
     }
+
+    const baseData = noteDoc.data();
+    if (baseData.isDeleted) return res.status(403).json({ message: 'Note is removed.' });
 
     const noteData = noteDoc.data();
     if (noteData.editCode !== editCode) {
@@ -372,6 +449,8 @@ app.get('/api/notes/s/:shortId', async (req, res) => {
     }
     const doc = snapshot.docs[0];
     const noteRef = notesCollection.doc(doc.id);
+    const baseData = doc.data();
+    if (baseData.isDeleted) return res.status(404).json({ message: 'Note has been removed.' });
     // Increment the views field atomically
     await noteRef.update({ views: admin.firestore.FieldValue.increment(1) });
     // Get the updated document
@@ -388,6 +467,153 @@ app.get('/api/notes/s/:shortId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching note by shortId:', error);
     res.status(500).json({ message: 'Server error while fetching note.' });
+  }
+});
+
+// --- Reporting ---
+app.post('/api/notes/:id/report', reportNoteLimiter, async (req, res) => {
+  try {
+    const noteId = req.params.id;
+    const { reason, details } = req.body || {};
+    const noteDoc = await notesCollection.doc(noteId).get();
+    if (!noteDoc.exists) return res.status(404).json({ message: 'Note not found.' });
+    const noteData = noteDoc.data();
+    const shortId = noteData.shortId;
+    const ua = req.headers['user-agent'] || '';
+    const ip = req.ip || '';
+    const reporterHash = hashReporter(ip, ua);
+    const cleanReason = typeof reason === 'string' ? reason.slice(0, 64) : '';
+    const cleanDetails = typeof details === 'string' ? details.slice(0, 500) : '';
+
+    // Prevent spamming: same reporter+note within last 24h using a guard doc
+    const guards = db.collection('reportGuards');
+    const guardId = `${noteId}_${reporterHash}`;
+    const guardRef = guards.doc(guardId);
+    const guardDoc = await guardRef.get();
+    const sinceMs = Date.now() - 24 * 60 * 60 * 1000;
+    if (guardDoc.exists) {
+      const g = guardDoc.data();
+      const ts = g && g.createdAt && g.createdAt.toDate ? g.createdAt.toDate().getTime() : 0;
+      if (ts && ts > sinceMs) {
+        return res.status(429).json({ message: 'You already reported this note recently.' });
+      }
+    }
+    await guardRef.set({ createdAt: admin.firestore.FieldValue.serverTimestamp() });
+
+    await reportsCollection.add({
+      noteId,
+      shortId,
+      reason: cleanReason || 'other',
+      details: cleanDetails,
+      reporterHash,
+      userAgent: ua.slice(0, 200),
+      referer: (req.headers['referer'] || '').toString().slice(0, 300),
+      status: 'open',
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    await notesCollection.doc(noteId).update({
+      reportCount: admin.firestore.FieldValue.increment(1),
+      lastReportedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    res.status(201).json({ message: 'Report submitted. Thank you.' });
+  } catch (e) {
+    console.error('Error reporting note:', e);
+    res.status(500).json({ message: 'Server error while reporting note.' });
+  }
+});
+
+// --- Admin APIs ---
+app.get('/api/admin/reports', requireAdmin, async (req, res) => {
+  try {
+    const status = (req.query.status || 'open').toString();
+    const limit = Math.min(parseInt((req.query.limit || '50').toString(), 10) || 50, 200);
+    const shortId = (req.query.shortId || '').toString().trim();
+    let items = [];
+
+    if (shortId) {
+      // Search reports by shortId, optional status filter; sort in-memory by createdAt desc
+      const snap = await reportsCollection.where('shortId', '==', shortId).limit(500).get();
+      items = snap.docs.map(d => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt ? d.data().createdAt.toDate() : null }));
+      if (status) items = items.filter(it => (it.status || 'open') === status);
+      items.sort((a, b) => (b.createdAt ? b.createdAt.getTime() : 0) - (a.createdAt ? a.createdAt.getTime() : 0));
+      items = items.slice(0, limit);
+    } else if (status) {
+      // Avoid composite index: filter by status, then sort by date
+      const snap = await reportsCollection.where('status', '==', status).limit(limit).get();
+      items = snap.docs.map(d => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt ? d.data().createdAt.toDate() : null }));
+      items.sort((a, b) => (b.createdAt ? b.createdAt.getTime() : 0) - (a.createdAt ? a.createdAt.getTime() : 0));
+    } else {
+      const snap = await reportsCollection.orderBy('createdAt', 'desc').limit(limit).get();
+      items = snap.docs.map(d => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt ? d.data().createdAt.toDate() : null }));
+    }
+
+    res.json({ items });
+  } catch (e) {
+    console.error('Error listing reports:', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post('/api/admin/reports/:id/close', requireAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    await reportsCollection.doc(id).update({ status: 'closed' });
+    res.json({ message: 'Report closed' });
+  } catch (e) {
+    console.error('Error closing report:', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.get('/api/admin/notes/:id', requireAdmin, async (req, res) => {
+  try {
+    const noteId = req.params.id;
+    const doc = await notesCollection.doc(noteId).get();
+    if (!doc.exists) return res.status(404).json({ message: 'Note not found' });
+    const data = doc.data();
+    const plaintext = decryptContent(data.content);
+    const reportsSnap = await reportsCollection.where('noteId', '==', noteId).orderBy('createdAt', 'desc').limit(50).get();
+    const reports = reportsSnap.docs.map(d => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt ? d.data().createdAt.toDate() : null }));
+    res.json({ note: { id: doc.id, shortId: data.shortId, content: plaintext, isDeleted: !!data.isDeleted, reportCount: data.reportCount || 0 }, reports });
+  } catch (e) {
+    console.error('Error fetching note (admin):', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post('/api/admin/notes/:id/delete', requireAdmin, async (req, res) => {
+  try {
+    const noteId = req.params.id;
+    await notesCollection.doc(noteId).update({ isDeleted: true });
+    // Close open reports for this note (best-effort)
+    const snap = await reportsCollection.where('noteId', '==', noteId).limit(500).get();
+    const batch = db.batch();
+    snap.docs.forEach(d => {
+      const data = d.data();
+      if (data && data.status !== 'closed') {
+        batch.update(d.ref, { status: 'closed' });
+      }
+    });
+    await batch.commit();
+    await moderationLogs.add({ noteId, action: 'delete', actor: 'admin', createdAt: admin.firestore.FieldValue.serverTimestamp() });
+    res.json({ message: 'Note deleted' });
+  } catch (e) {
+    console.error('Error deleting note:', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post('/api/admin/notes/:id/restore', requireAdmin, async (req, res) => {
+  try {
+    const noteId = req.params.id;
+    await notesCollection.doc(noteId).update({ isDeleted: false });
+    await moderationLogs.add({ noteId, action: 'restore', actor: 'admin', createdAt: admin.firestore.FieldValue.serverTimestamp() });
+    res.json({ message: 'Note restored' });
+  } catch (e) {
+    console.error('Error restoring note:', e);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

@@ -44,6 +44,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const contentSizeDisplay = document.getElementById('contentSizeDisplay');
 
+    // Report modal elements
+    const reportNoteButton = document.getElementById('reportNoteButton');
+    const reportModal = document.getElementById('reportModal');
+    const reportReason = document.getElementById('reportReason');
+    const reportDetails = document.getElementById('reportDetails');
+    const submitReportButton = document.getElementById('submitReportButton');
+    const cancelReportButton = document.getElementById('cancelReportButton');
+    const reportFeedback = document.getElementById('reportFeedback');
+
     // Add new element getters for tabbed interface
     const writeTab = document.getElementById('write-tab');
     const previewTab = document.getElementById('preview-tab');
@@ -305,7 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
     showAds(false); // We control ads via manual placement, not banner toggles
         
         // Parse and render the Markdown content
-        noteContentDisplay.innerHTML = marked.parse(noteData.content || '');
+        const unsafeHtml = marked.parse(noteData.content || '');
+        noteContentDisplay.innerHTML = window.DOMPurify ? DOMPurify.sanitize(unsafeHtml) : unsafeHtml;
         
         // Apply syntax highlighting to code blocks
         noteContentDisplay.querySelectorAll('pre code').forEach((block) => {
@@ -329,6 +339,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // User-generated content should not be indexed
     setRobotsNoIndex(true);
+
+    // Wire report button in view context
+    if (reportNoteButton) {
+        reportNoteButton.onclick = () => {
+            if (!currentNoteId) { showError('No note loaded.'); return; }
+            reportFeedback.style.display = 'none';
+            reportFeedback.textContent = '';
+            if (reportModal) reportModal.style.display = 'flex';
+        };
+    }
     }
 
     function showEditView(noteContent) {
@@ -746,6 +766,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (cancelReportButton) {
+        cancelReportButton.addEventListener('click', () => {
+            if (reportModal) reportModal.style.display = 'none';
+        });
+    }
+
+    async function submitReport() {
+        if (!currentNoteId) { showError('No note loaded.'); return; }
+        const reason = (reportReason && reportReason.value) || 'other';
+        const details = (reportDetails && reportDetails.value) || '';
+        try {
+            const resp = await fetch(`${API_BASE_URL_ROOT}/api/notes/${currentNoteId}/report`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason, details })
+            });
+            let data = {};
+            try { data = await resp.json(); } catch(_) { data = { message: await resp.text().catch(()=> 'Server error') }; }
+            if (!resp.ok) throw new Error(data.message || 'Failed to submit report');
+            if (reportFeedback) {
+                reportFeedback.textContent = 'Report submitted. Thank you.';
+                reportFeedback.style.display = 'block';
+            }
+            setTimeout(() => { if (reportModal) reportModal.style.display = 'none'; }, 900);
+        } catch (e) {
+            if (reportFeedback) {
+                reportFeedback.textContent = e.message || 'Failed to submit report';
+                reportFeedback.style.display = 'block';
+            }
+        }
+    }
+
+    if (submitReportButton) submitReportButton.addEventListener('click', submitReport);
+
     window.addEventListener('popstate', router);
 
     // Intercept local link clicks for SPA navigation (simplified)
@@ -780,7 +834,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updatePreview() {
         const content = textContent.value;
-        editorPreview.innerHTML = marked.parse(content);
+        const unsafeHtml = marked.parse(content);
+        editorPreview.innerHTML = window.DOMPurify ? DOMPurify.sanitize(unsafeHtml) : unsafeHtml;
         
         // Apply syntax highlighting to code blocks
         editorPreview.querySelectorAll('pre code').forEach((block) => {

@@ -191,6 +191,7 @@
                 <div class="button-group">
                     <button id="editThisNoteButton" class="btn btn-secondary">Edit Note</button>
                     <button id="createNewNoteFromViewButton" class="btn btn-primary">New</button>
+                    <button id="reportNoteButton" class="btn btn-secondary">Report</button>
                 </div>
             </div>
 
@@ -242,8 +243,30 @@
             </section>
         </div>
         
-         
+        <!-- Report Modal -->
+        <div id="reportModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <h3>Report Note</h3>
+                <label for="reportReason">Reason</label>
+                <select id="reportReason">
+                    <option value="spam">Spam</option>
+                    <option value="illegal">Illegal content</option>
+                    <option value="malware">Malware/phishing</option>
+                    <option value="doxxing">Doxxing/PII</option>
+                    <option value="other">Other</option>
+                </select>
+                <label for="reportDetails" style="margin-top:8px;">Details (optional)</label>
+                <textarea id="reportDetails" rows="4" placeholder="Describe the issue (max 500 chars)"></textarea>
+                <div class="modal-actions">
+                    <button id="submitReportButton" class="btn btn-primary">Submit</button>
+                    <button id="cancelReportButton" class="btn btn-secondary">Cancel</button>
+                </div>
+                <div id="reportFeedback" class="alert" style="display:none;"></div>
+            </div>
+        </div>
 
+         
+ 
         <footer class="app-footer">
             <div class="copyright-text">&copy; <span id="currentYear"></span> Flingnote. All rights reserved.</div>
             <div class="footer-links">
@@ -261,6 +284,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
     <script src="script.js"></script>  
     
     <script>
