@@ -187,7 +187,9 @@ app.use(
           "https://www.highperformanceformat.com",
           "https://professionaltrafficmonitor.com",
           "https://torchfriendlypay.com",
-          "https://*.revenuecpmgate.com", "https://revenuecpmgate.com"
+          "https://*.revenuecpmgate.com", "https://revenuecpmgate.com",
+          "https://preferencenail.com",
+          "https://creative-sb1.com"
         ],
         styleSrc: [
           "'self'", "'unsafe-inline'", "https://fonts.googleapis.com",
