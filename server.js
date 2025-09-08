@@ -184,12 +184,6 @@ app.use(
           "https://www.googletagmanager.com", "https://*.google-analytics.com", "https://*.analytics.google.com",
           "https://cdnjs.cloudflare.com",
           "https://cdn.jsdelivr.net",
-          "https://www.highperformanceformat.com",
-          "https://professionaltrafficmonitor.com",
-          "https://torchfriendlypay.com",
-          "https://*.revenuecpmgate.com", "https://revenuecpmgate.com",
-          "https://preferencenail.com",
-          "https://creative-sb1.com"
         ],
         styleSrc: [
           "'self'", "'unsafe-inline'", "https://fonts.googleapis.com",
@@ -205,13 +199,11 @@ app.use(
           "https://www.tinylaun.ch",
           "https://tinylaun.ch/tinylaunch_badge_launching_soon.svg"
         ],
-        frameSrc: ["'self'", "https:", "data:", "https://www.highperformanceformat.com", "https://highperformanceformat.com"],
+        frameSrc: ["'self'", "https:", "data:"],
         connectSrc: [
           "'self'",
           "https://*.google-analytics.com", "https://*.analytics.google.com",
           "https://firestore.googleapis.com", "https://*.firebaseio.com",
-          "https://professionaltrafficmonitor.com", "https://torchfriendlypay.com",
-          "https://www.highperformanceformat.com", "https://highperformanceformat.com",
           "https:"
         ],
       },
@@ -265,15 +257,6 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-// --- Explicit routes for SEO/AdSense assets ---
-app.get('/ads.txt', (req, res) => {
-  res.type('text/plain');
-  res.sendFile(path.join(__dirname, 'public', 'ads.txt'));
-});
-app.get('/.well-known/ads.txt', (req, res) => {
-  res.type('text/plain');
-  res.sendFile(path.join(__dirname, 'public', 'ads.txt'));
-});
 app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
   res.sendFile(path.join(__dirname, 'public', 'robots.txt'));

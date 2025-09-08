@@ -11,8 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     
 
-    const topAdBanner = document.getElementById('top-ad-banner');
-    const bottomAdBanner = document.getElementById('bottom-ad-banner');
 
 
     const editorArea = document.getElementById('editor-area');
@@ -28,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const editCodeSection = document.getElementById('edit-code-section');
 
     const noteContentDisplay = document.getElementById('noteContentDisplay');
-    const topAdSlot = document.getElementById('top-ad-slot');
     const initialViewCountDisplay = document.getElementById('initialViewCountDisplay');
     const noteViewCountDisplay = document.getElementById('noteViewCountDisplay');
     const noteTimestampDisplay = document.getElementById('noteTimestamp');
@@ -153,11 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return params;
     }
 
-    function showAds(visible) {
-        const displayValue = visible ? 'flex' : 'none'; // Use 'flex' as per your CSS for ad-banner
-        if (topAdBanner) topAdBanner.style.display = displayValue;
-        if (bottomAdBanner) bottomAdBanner.style.display = displayValue;
-    }
 
     
     
@@ -169,9 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
         infoArea.style.display = 'none';
         viewArea.style.display = 'none';
         if (codeAccessRow) codeAccessRow.style.display = 'none';
-        
-        // Hide ads by default when switching views
-        showAds(false);
 
         if (activeViewElement) {
             activeViewElement.style.display = 'block';
@@ -261,7 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function showEditorView() {
         setActiveView(editorArea);
         if (codeAccessRow) codeAccessRow.style.display = 'flex';
-    showAds(false);
         setRobotsNoIndex(false);
         textContent.value = '';
         editCodeInput.value = '';
@@ -274,16 +262,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Reset to Write tab
         switchTab('write');
-        // Always load Adsterra in the top slot on home/editor page
-        renderAdsterra(topAdSlot);
-        // Lazy-load native when near viewport
-        setupNativeLazyLoad();
     }
 
     function showInfoView(data) { // data: { id, shortId, editCode, message, viewCount }
         setActiveView(infoArea);
-    showAds(false);
-    setRobotsNoIndex(false);
+        setRobotsNoIndex(false);
         messageDisplay.textContent = data.message || 'Note saved successfully!';
         
         // Path-based URLs (no encryption key in fragment)
@@ -311,7 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showNoteView(noteData) {
         setActiveView(viewArea);
-    showAds(false); // We control ads via manual placement, not banner toggles
         
         // Parse and render the Markdown content
         const unsafeHtml = marked.parse(noteData.content || '');
@@ -329,16 +311,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if(noteViewCountDisplay) noteViewCountDisplay.textContent = noteData.views !== undefined ? noteData.views : 'N/A';
         
-    currentNoteId = noteData.id;
-    currentShortId = noteData.shortId;
+        currentNoteId = noteData.id;
+        currentShortId = noteData.shortId;
 
-    // Always load Adsterra ad in the top slot on view page
-    renderAdsterra(topAdSlot);
-    // Lazy-load native when near viewport
-    setupNativeLazyLoad();
-
-    // User-generated content should not be indexed
-    setRobotsNoIndex(true);
+        // User-generated content should not be indexed
+        setRobotsNoIndex(true);
 
     // Wire report button in view context
     if (reportNoteButton) {
@@ -353,8 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showEditView(noteContent) {
         setActiveView(editorArea);
-    showAds(false);
-    setRobotsNoIndex(false);
+        setRobotsNoIndex(false);
         if (codeAccessRow) codeAccessRow.style.display = 'none';
         textContent.value = noteContent;
         saveButton.style.display = 'none';
@@ -607,129 +583,6 @@ document.addEventListener('DOMContentLoaded', () => {
         router();
     }
 
-    // --- Adsterra integration (no gating) ---
-    function teardownAds() {
-        if (topAdSlot) topAdSlot.innerHTML = '';
-    }
-
-    function renderAdsterra(targetContainer) {
-        if (!targetContainer) return;
-        targetContainer.style.display = 'block';
-
-        const isMobile = window.innerWidth <= 768;
-        const key = isMobile ? 'e1786569efff04fd564619596fc583f5' : '7ac8da3d9a7f06b9b3dec589aa0511fa';
-
-        if (targetContainer.dataset && targetContainer.dataset.adKey === key) {
-            return;
-        }
-        if (targetContainer.dataset) {
-            targetContainer.dataset.adKey = key;
-        }
-
-        targetContainer.innerHTML = '';
-
-        const width = isMobile ? 320 : 728;
-        const height = isMobile ? 50 : 90;
-
-        const optionsScript = document.createElement('script');
-        optionsScript.type = 'text/javascript';
-        optionsScript.text = `\n\tatOptions = {\n\t\t'key' : '${key}',\n\t\t'format' : 'iframe',\n\t\t'height' : ${height},\n\t\t'width' : ${width},\n\t\t'params' : {}\n\t};\n`;
-
-        const invokeScript = document.createElement('script');
-        invokeScript.type = 'text/javascript';
-        invokeScript.src = `https://www.highperformanceformat.com/${key}/invoke.js`;
-
-        targetContainer.appendChild(optionsScript);
-        targetContainer.appendChild(invokeScript);
-
-        // Adjust spacer height on mobile when fixed
-        const spacer = document.getElementById('top-ad-spacer');
-        if (spacer) {
-            setTimeout(() => {
-                const rect = targetContainer.getBoundingClientRect();
-                // Only adjust on small screens where banner may be fixed
-                if (window.innerWidth <= 768) {
-                    spacer.style.height = Math.max(rect.height || 50, 50) + 'px';
-                } else {
-                    spacer.style.height = '0px';
-                }
-            }, 600);
-        }
-    }
-
-    // RevenueCPM Native (1:4) loader
-    function renderRevenueCpmNative(mountElementId) {
-        const mount = document.getElementById(mountElementId);
-        if (!mount) return;
-        // Ensure only one expected container id exists anywhere
-        const requiredId = 'container-3b3095fb6c40ae8dd4b71c03741aaadf';
-        const existing = document.getElementById(requiredId);
-        if (existing && existing.parentElement) {
-            existing.parentElement.removeChild(existing);
-        }
-        // Remove any previously injected RevenueCPM scripts to allow re-execution
-        const existingScripts = Array.from(document.querySelectorAll('script'))
-          .filter(s => s.src && s.src.includes('revenuecpmgate.com/3b3095fb6c40ae8dd4b71c03741aaadf/invoke.js'));
-        existingScripts.forEach(s => s.parentElement && s.parentElement.removeChild(s));
-        // Reset mount and create the exact container id the script expects
-        mount.innerHTML = '';
-        const container = document.createElement('div');
-        container.id = requiredId;
-        container.className = 'ad-slot';
-        // Add skeleton while loading
-        container.classList.add('ad-skeleton');
-        mount.appendChild(container);
-
-        const script = document.createElement('script');
-        script.async = true;
-        script.setAttribute('data-cfasync', 'false');
-        const cacheBuster = Date.now().toString();
-        script.src = `https://pl27540461.revenuecpmgate.com/3b3095fb6c40ae8dd4b71c03741aaadf/invoke.js?cb=${cacheBuster}`;
-        mount.appendChild(script);
-
-        // Simple skeleton removal after timeout - no observer to avoid performance issues
-        setTimeout(() => {
-            const node = document.getElementById(requiredId);
-            if (node) {
-                node.classList.remove('ad-skeleton');
-            }
-        }, 3000);
-    }
-
-    // Lazy-load native ads: trigger when mounts enter viewport
-    function setupNativeLazyLoad() {
-        const mounts = ['native-ad-mount-editor', 'native-ad-mount-view']
-            .map(id => document.getElementById(id))
-            .filter(Boolean);
-        if (mounts.length === 0) return;
-        if (!('IntersectionObserver' in window)) {
-            mounts.forEach(m => renderRevenueCpmNative(m.id));
-            return;
-        }
-        const io = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    renderRevenueCpmNative(entry.target.id);
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { root: null, rootMargin: '200px 0px', threshold: 0.01 });
-        mounts.forEach(m => io.observe(m));
-    }
-
-    // Re-render ad on resize (debounced) to switch between mobile/desktop units
-    let adResizeTimeout;
-    let lastIsMobile = window.innerWidth <= 768;
-    window.addEventListener('resize', () => {
-        clearTimeout(adResizeTimeout);
-        adResizeTimeout = setTimeout(() => {
-            const isMobile = window.innerWidth <= 768;
-            if (isMobile !== lastIsMobile) {
-                renderAdsterra(topAdSlot);
-                lastIsMobile = isMobile;
-            }
-        }, 700);
-    });
     
     // --- Event Listeners ---
     if(saveButton) saveButton.addEventListener('click', saveNote);
